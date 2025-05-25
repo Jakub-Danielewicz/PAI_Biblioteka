@@ -1,0 +1,42 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table books {
+  id int [primary key]
+  ISBN_13 long [unique]
+  Title string
+  Author string
+  Publisher string
+  Release_Date date
+}
+
+Table users {
+  id integer [primary key]
+  username varchar
+  password string
+  created_at timestamp
+}
+
+Table orders {
+  id integer [primary key]
+  user_id users.id
+  book_id books.id
+  start_date date
+  end_date date
+  status varchar
+}
+
+Table reviews {
+  id integer [primary key]
+  author_id users.id
+  book_ISBN books.ISBN_13
+  rating int
+  content string
+}
+
+Ref user_reviews: reviews.author_id > users.id // many-to-one
+Ref user_orders: orders.user_id > users.id // many-to-one
+Ref: orders.book_id > books.id
+Ref: books.ISBN_13 < reviews.book_ISBN
+
+//Ref: users.id < follows.followed_user_id
