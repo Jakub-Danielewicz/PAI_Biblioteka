@@ -1,17 +1,21 @@
 import './App.css'
-import AnimatedBookStack from './components/AnimatedBookStack'
-import LoginForm from './components/LoginForm'
+import LoginPage from './pages/LoginPage'
+import HomePage from './pages/HomePage'
+import { Routes, Route } from 'react-router'
 import Layout from './components/Layout'
+import { useState } from 'react'
 
 function App() {
+  const [isLoggedIn, _] = useState(false)
+
   return (
     <Layout>
-      <div className='w-3/5 h-3/4'>
-        <AnimatedBookStack />
-      </div>
-      <div className='w-full h-ful flex items-center justify-center'>
-        <LoginForm />
-      </div>
+      <Routes>
+        <Route
+          path="/"
+          element={isLoggedIn ? <HomePage /> : <LoginPage />}
+        />
+      </Routes>
     </Layout>
   )
 }
