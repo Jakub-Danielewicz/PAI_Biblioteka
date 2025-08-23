@@ -1,6 +1,6 @@
 const CalendarWidget = () => {
   const today = new Date();
-  const month = today.toLocaleString("default", { month: "long" });
+  const month = today.toLocaleString("en-US", { month: "long" });
   const year = today.getFullYear();
   const currentDay = today.getDate();
 
