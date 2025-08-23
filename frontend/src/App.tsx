@@ -6,6 +6,7 @@ import BookRentalsPage from './pages/BookRentalsPage'
 import { Routes, Route } from 'react-router'
 import Layout from './components/Layout'
 import { useState } from 'react'
+import UserProfilePage from './pages/UserProfilePage'
 
 function App() {
   const [isLoggedIn, _] = useState(true)
@@ -24,6 +25,11 @@ function App() {
         <Route
           path='/rentals'
           element={<BookRentalsPage />}
+        />
+
+         <Route
+          path='/profile'
+          element={<UserProfilePage />}
         />
 
       </Routes>
