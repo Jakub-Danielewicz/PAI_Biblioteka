@@ -21,7 +21,6 @@ export async function borrowCopy(req, res) {
       return res.status(400).json({ error: 'Copy is not available' });
     }
 
-    // Tworzymy rekord Borrow
     await Borrow.create({
       userId,
       copyId,
