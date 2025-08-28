@@ -7,7 +7,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const navItems = [
-    { path: '/books', label: 'Książki' },
+    { path: '/', label: 'Książki' },
     { path: '/authors', label: 'Autorzy' },
     { path: '/categories', label: 'Kategorie' },
     { path: '/rentals', label: 'Wypożyczenia' }

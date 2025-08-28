@@ -4,7 +4,7 @@ import copyModel from './copy.js';
 import userModel from './user.js';
 import borrowModel from './borrow.js';
 
-const sequelize = new Sequelize(process.env.DB_CONNECTION_STRING || 'sqlite::memory:');
+const sequelize = new Sequelize(process.env.DB_CONNECTION_STRING || 'sqlite:./database.sqlite');
 
 const Book = bookModel(sequelize);
 const Copy = copyModel(sequelize);

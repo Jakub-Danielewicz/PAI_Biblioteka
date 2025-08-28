@@ -6,7 +6,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div className='flex w-full h-full'>
+    <div className='w-full min-h-screen'>
       {children}
     </div>
   )

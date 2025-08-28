@@ -8,7 +8,7 @@ import Layout from './components/Layout'
 import { useState } from 'react'
 
 function App() {
-  const [isLoggedIn, _] = useState(false)
+  const [isLoggedIn, _] = useState(true)
 
   return (
     <Layout>
@@ -22,8 +22,8 @@ function App() {
           element={<BookPage />}
         />
         <Route
-        path='/rentals'
-        element={<BookRentalsPage />}
+          path='/rentals'
+          element={<BookRentalsPage />}
         />
 
       </Routes>
