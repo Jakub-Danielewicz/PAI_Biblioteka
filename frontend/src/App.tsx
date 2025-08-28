@@ -5,10 +5,10 @@ import BookPage from './pages/BookPage'
 import BookRentalsPage from './pages/BookRentalsPage'
 import { Routes, Route } from 'react-router'
 import Layout from './components/Layout'
-import { useState } from 'react'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 
-function App() {
-  const [isLoggedIn, _] = useState(true)
+function AppRoutes() {
+  const { isLoggedIn } = useAuth();
 
   return (
     <Layout>
@@ -25,9 +25,16 @@ function App() {
           path='/rentals'
           element={<BookRentalsPage />}
         />
-
       </Routes>
     </Layout>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   )
 }
 
