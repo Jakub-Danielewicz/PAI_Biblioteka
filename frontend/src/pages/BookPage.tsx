@@ -2,6 +2,7 @@ import { useParams } from "react-router";
 import BookCard from "../components/BookCard";
 import BookDetails from "../components/BookDetails";
 import { useEffect, useState } from "react";
+import api from "../utils/api";
 
 export default function BookPage() {
   const { id } = useParams();
@@ -10,23 +11,20 @@ export default function BookPage() {
   const [error, setError] = useState<any>(null);
 
   useEffect(() => {
-    if (id) {
-      fetch(`http://localhost:3001/books/${id}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to fetch book');
-          }
-          return response.json();
-        })
-        .then(data => {
-          setBook(data);
+    const fetchBook = async () => {
+      if (id) {
+        try {
+          const response = await api.get(`/books/${id}`);
+          setBook(response.data);
           setLoading(false);
-        })
-        .catch(err => {
-          setError(err.message);
+        } catch (e: any) {
+          setError(e.response?.data?.message || "Failed to fetch book");
           setLoading(false);
-        });
-    }
+        }
+      }
+    };
+
+    fetchBook();
   }, [id]);
 
   if (loading) {

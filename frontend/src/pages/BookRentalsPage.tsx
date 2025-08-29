@@ -1,19 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookOpenIcon, ClockIcon, CheckCircleIcon, ExclamationCircleIcon, StarIcon } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
+import api from "../utils/api";
 import CalendarWidget from "../components/CalendarWidget";
-
-const rentals = [
-  { id: "1", title: "The Great Gatsby", author: "F. Scott Fitzgerald", deadline: "2025-08-20", returned: false, rating: 5 },
-  { id: "2", title: "1984", author: "George Orwell", deadline: "2025-08-18", returned: true, rating: 4 },
-  { id: "3", title: "Moby Dick", author: "Herman Melville", deadline: "2025-08-25", returned: false, rating: 3 },
-  { id: "4", title: "To Kill the Mockingbird", author: "Harper Lee", deadline: "2025-08-26", returned: false, rating: 5 },
-  { id: "8", title: "The Catcher in the Rye", author: "J.D. Salinger", deadline: "2025-08-22", returned: true, rating: 4 },
-  { id: "9", title: "The Hobbit", author: "J.R.R. Tolkien", deadline: "2025-08-01", returned: true, rating: 5 },
-  { id: "10", title: "The Road", author: "Cormac McCarthy", deadline: "2025-08-27", returned: false, rating: 4 },
-  { id: "11", title: "Brave New World", author: "Aldous Huxley", deadline: "2025-08-11", returned: false, rating: 4 },
-  { id: "12", title: "Anna Karenina", author: "Leo Tolstoy", deadline: "2025-09-01", returned: false, rating: 5 },
-];
 
 const today = new Date();
 
@@ -24,14 +13,33 @@ const sectionIcons = {
 };
 
 export default function BookRentalsPage() {
+  const [rentals, setRentals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "ongoing" | "overdue" | "returned">("all");
 
+  useEffect(() => {
+    const fetchRentals = async () => {
+      try {
+        const response = await api.get("/borrows");
+        setRentals(response.data || []);
+        setLoading(false);
+      } catch (e: any) {
+        console.error(e);
+        setError(e.response?.data?.message || "Failed to fetch rentals");
+        setLoading(false);
+      }
+    };
+
+    fetchRentals();
+  }, []);
+
   const filteredRentals = rentals
-    .filter((book) => {
-      const deadlineDate = new Date(book.deadline);
-      if (filter === "ongoing") return !book.returned && deadlineDate >= today;
-      if (filter === "overdue") return !book.returned && deadlineDate < today;
-      if (filter === "returned") return book.returned;
+    .filter((rental) => {
+      const deadlineDate = new Date(rental.deadline);
+      if (filter === "ongoing") return !rental.returned && deadlineDate >= today;
+      if (filter === "overdue") return !rental.returned && deadlineDate < today;
+      if (filter === "returned") return rental.returned;
       return true;
     })
     .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime());
@@ -43,6 +51,29 @@ export default function BookRentalsPage() {
   };
 
   const sectionOrder: (keyof typeof sections)[] = ["Ongoing", "Returned", "Overdue"];
+
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen bg-gray-50 flex flex-col">
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-800 text-lg">Loading rentals...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full min-h-screen bg-gray-50 flex flex-col">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold text-gray-800 mb-2">📚 My Rentals</h1>
+            <p className="text-red-600">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-gray-50 flex flex-col">

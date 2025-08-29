@@ -1,5 +1,5 @@
-import axios from "axios"
 import { useState, useEffect } from "react"
+import api from "../utils/api"
 import BookCard from "../components/BookCard"
 
 export default function HomePage() {
@@ -10,12 +10,12 @@ export default function HomePage() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get("http://localhost:3001/books");
+        const response = await api.get("/books");
         setBooks(response.data.data);
         setLoading(false);
-      } catch (e) {
+      } catch (e: any) {
         console.log(e);
-        setError("Failed to fetch books");
+        setError(e.response?.data?.message || "Failed to fetch books");
         setLoading(false);
       }
     })();

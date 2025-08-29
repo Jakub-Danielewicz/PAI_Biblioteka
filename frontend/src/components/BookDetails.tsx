@@ -1,6 +1,6 @@
 import { StarIcon, UserIcon } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
-import { getBookAvailability, getBookMockData } from "../utils/bookUtils";
+import { getBookAvailability, calculateAverageRating } from "../utils/bookUtils";
 
 interface BookDetailsProps {
   book: any;
@@ -8,7 +8,8 @@ interface BookDetailsProps {
 
 export default function BookDetails({ book }: BookDetailsProps) {
   const { availableCopies, totalCopies } = getBookAvailability(book);
-  const mockData = getBookMockData(book.ISBN_13);
+  const reviews = book.reviews || [];
+  const averageRating = calculateAverageRating(reviews);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -22,14 +23,17 @@ export default function BookDetails({ book }: BookDetailsProps) {
         {/* Description */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">📖 Description</h2>
-          <p className="text-gray-700 leading-relaxed">{mockData.description}</p>
+          <p className="text-gray-700 leading-relaxed">
+            {book.description || "No description available for this book."}
+          </p>
         </div>
 
         {/* Reviews */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">⭐ Reviews ({mockData.reviews.length})</h2>
-          <div className="space-y-4">
-            {mockData.reviews.map((review, index) => (
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">⭐ Reviews ({reviews.length})</h2>
+          {reviews.length > 0 ? (
+            <div className="space-y-4">
+              {reviews.map((review: any, index: number) => (
               <motion.div
                 key={review.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -58,6 +62,12 @@ export default function BookDetails({ book }: BookDetailsProps) {
               </motion.div>
             ))}
           </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No reviews available for this book yet.</p>
+              <p className="text-gray-400 text-sm mt-2">Be the first to review it!</p>
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -91,8 +101,17 @@ export default function BookDetails({ book }: BookDetailsProps) {
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-gray-600">Total Reviews</span>
-              <span className="font-semibold">{mockData.reviews.length}</span>
+              <span className="font-semibold">{reviews.length}</span>
             </div>
+            {reviews.length > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Average Rating</span>
+                <div className="flex items-center gap-1">
+                  <StarIcon className="w-4 h-4 text-yellow-400" />
+                  <span className="font-semibold">{averageRating.toFixed(1)}</span>
+                </div>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-gray-600">Publication Year</span>
               <span className="font-semibold">{book.year}</span>
