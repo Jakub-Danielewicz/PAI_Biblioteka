@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { sequelize } from './models/index.js';
 import { authenticate } from "./middleware/authMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import bookRoutes from './routes/bookRoutes.js';
 import borrowRoutes from './routes/borrowRoutes.js';
 import reviewRoutes from "./routes/reviewRoutes.js";
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use(bookRoutes);
 app.use(borrowRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/reviews", reviewRoutes);
 
 app.get('/', (req, res) => {

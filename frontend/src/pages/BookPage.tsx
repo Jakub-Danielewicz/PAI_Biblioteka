@@ -1,8 +1,8 @@
 import { useParams } from "react-router";
-import Navbar from "../components/Navbar";
 import BookCard from "../components/BookCard";
 import BookDetails from "../components/BookDetails";
 import { useEffect, useState } from "react";
+import api from "../utils/api";
 
 export default function BookPage() {
   const { id } = useParams();
@@ -11,29 +11,25 @@ export default function BookPage() {
   const [error, setError] = useState<any>(null);
 
   useEffect(() => {
-    if (id) {
-      fetch(`http://localhost:3001/books/${id}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to fetch book');
-          }
-          return response.json();
-        })
-        .then(data => {
-          setBook(data);
+    const fetchBook = async () => {
+      if (id) {
+        try {
+          const response = await api.get(`/books/${id}`);
+          setBook(response.data);
           setLoading(false);
-        })
-        .catch(err => {
-          setError(err.message);
+        } catch (e: any) {
+          setError(e.response?.data?.message || "Failed to fetch book");
           setLoading(false);
-        });
-    }
+        }
+      }
+    };
+
+    fetchBook();
   }, [id]);
 
   if (loading) {
     return (
       <div className="w-full min-h-screen bg-gray-50 flex flex-col">
-        <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-gray-800 text-lg">Loading book details...</p>
         </div>
@@ -44,7 +40,6 @@ export default function BookPage() {
   if (error) {
     return (
       <div className="w-full min-h-screen bg-gray-50 flex flex-col">
-        <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-gray-800 mb-2">📚 Book Not Found</h1>
@@ -58,7 +53,6 @@ export default function BookPage() {
   if (!book) {
     return (
       <div className="w-full min-h-screen bg-gray-50 flex flex-col">
-        <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-gray-800">Book not found</p>
         </div>
@@ -68,7 +62,6 @@ export default function BookPage() {
 
   return (
     <div className="w-full min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
       <main className="flex-1 p-6">
         <div className="max-w-6xl mx-auto">
           {/* Book Card - same as homepage but centered */}

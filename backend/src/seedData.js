@@ -1,4 +1,5 @@
 import { sequelize, Book, Copy, User } from './models/index.js';
+import bcrypt from 'bcrypt';
 
 const mockBooks = [
   {
@@ -62,15 +63,18 @@ const mockBooks = [
 const mockUsers = [
   {
     name: 'Jan Kowalski',
-    email: 'jan.kowalski@example.com'
+    email: 'jan.kowalski@example.com',
+    password: 'password123'
   },
   {
     name: 'Anna Nowak',
-    email: 'anna.nowak@example.com'
+    email: 'anna.nowak@example.com',
+    password: 'password123'
   },
   {
     name: 'Piotr Wiśniewski',
-    email: 'piotr.wisniewski@example.com'
+    email: 'piotr.wisniewski@example.com',
+    password: 'password123'
   }
 ];
 
@@ -85,9 +89,15 @@ export async function seedDatabase() {
     console.log('Inserting books...');
     await Book.bulkCreate(mockBooks);
 
-    // Insert users
+    // Insert users with hashed passwords
     console.log('Inserting users...');
-    await User.bulkCreate(mockUsers);
+    const usersWithHashedPasswords = await Promise.all(
+      mockUsers.map(async (user) => ({
+        ...user,
+        password: await bcrypt.hash(user.password, 10)
+      }))
+    );
+    await User.bulkCreate(usersWithHashedPasswords);
 
     // Insert copies for each book
     console.log('Inserting book copies...');

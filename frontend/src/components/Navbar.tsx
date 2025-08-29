@@ -1,10 +1,12 @@
 import { Link, useLocation, useNavigate } from 'react-router'
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import userIcon from '../assets/svgs/user.svg'
 
 export default function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { logout } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const navItems = [
@@ -49,6 +51,14 @@ export default function Navbar() {
               onClick={() => navigate('/profile')}
             >
               <img src={userIcon} alt="User" className="w-6 h-6 opacity-60" />
+            </button>
+
+            {/* Logout */}
+            <button
+              onClick={logout}
+              className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              Logout
             </button>
 
             {/* Mobile menu button */}
