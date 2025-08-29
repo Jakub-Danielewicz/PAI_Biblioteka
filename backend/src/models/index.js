@@ -38,4 +38,4 @@ Review.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Book.hasMany(Review, { foreignKey: 'bookId', as: 'reviews', sourceKey: 'ISBN_13' });
 Review.belongsTo(Book, { foreignKey: 'bookId', as: 'book', targetKey: 'ISBN_13' });
 
-export { sequelize, Book, Copy, User, Borrow };
+export { sequelize, Book, Copy, User, Borrow, Review };

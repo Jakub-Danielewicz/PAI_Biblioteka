@@ -1,68 +1,94 @@
-import { useState, useEffect } from "react";
-
-const availableAvatars: string[] = ["👓", "🖋️", "📖", "📚", "📜", "📘"];
-
-interface User {
-  email: string;
-  createdAt: string;
-  booksRented: number;
-  reviewsCount: number;
-  nickname: string;
-  avatar: string;
-}
-
-const defaultUser: User = {
-  email: "john.doe@example.com",
-  createdAt: "2024-02-15",
-  booksRented: 12,
-  reviewsCount: 5,
-  nickname: "",
-  avatar: "📖",
-};
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 export default function UserProfile() {
-  const [nickname, setNickname] = useState<string>("");
-  const [avatar, setAvatar] = useState<string>(defaultUser.avatar);
-  const [editingNick, setEditingNick] = useState<boolean>(false);
-  const [tempNick, setTempNick] = useState<string>("");
+  const { user, login } = useAuth(); // Get user from context
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const storedNickname = localStorage.getItem("nickname");
-    const storedAvatar = localStorage.getItem("avatar");
-    if (storedNickname) setNickname(storedNickname);
-    if (storedAvatar) setAvatar(storedAvatar);
-  }, []);
+  const [editingName, setEditingName] = useState(false);
+  const [tempName, setTempName] = useState("");
 
-  const handleSaveNick = () => {
-    if (tempNick.trim() === "") return;
-    setNickname(tempNick);
-    localStorage.setItem("nickname", tempNick);
-    setEditingNick(false);
-    setTempNick("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
+
+  if (!user) return <p className="text-white">User not logged in</p>;
+
+  const handleSaveName = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/change-nickname", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ name: tempName }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        // ✅ Update context with new name
+        login(localStorage.getItem("token")!, { ...user, name: data.name });
+        setEditingName(false);
+        setMessage("Nickname updated successfully!");
+      } else {
+        setMessage(data.message || "Error updating nickname");
+      }
+    } catch {
+      setMessage("Server error");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSelectAvatar = (a: string) => {
-    setAvatar(a);
-    localStorage.setItem("avatar", a);
+  const handlePasswordChange = async () => {
+    if (newPassword !== confirmPassword) {
+      setMessage("New passwords do not match!");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setMessage("Password updated successfully!");
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        setMessage(data.message || "Error changing password");
+      }
+    } catch {
+      setMessage("Server error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-purple-800 to-slate-900 flex items-center justify-center p-8">
       <div className="w-full max-w-xl bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 flex flex-col p-10 space-y-8 text-white">
         
-        {/* Header: Avatar next to Nickname */}
+        {/* Header */}
         <div className="flex flex-row items-center justify-center space-x-4">
-          <div className="text-7xl animate-bounce">{avatar}</div>
-          <h1 className="text-3xl font-extrabold drop-shadow-lg">{nickname || "User Profile"}</h1>
+          <h1 className="text-3xl font-extrabold drop-shadow-lg">{user.name}</h1>
         </div>
 
-        {/* Info fields */}
+        {/* Info */}
         <div className="flex flex-col space-y-4">
           {[
-            { label: "Email", value: defaultUser.email },
-            { label: "Account Created", value: defaultUser.createdAt },
-            { label: "Books Rented", value: defaultUser.booksRented },
-            { label: "Reviews Written", value: defaultUser.reviewsCount },
+            { label: "Email", value: user.email },
           ].map((info) => (
             <div
               key={info.label}
@@ -74,25 +100,26 @@ export default function UserProfile() {
           ))}
         </div>
 
-        {/* Nickname */}
+        {/* Change Name */}
         <div className="flex flex-col space-y-3">
           <div className="flex items-center space-x-2">
             <p className="font-medium text-base">Nickname:</p>
-            <p className="font-semibold text-lg">{nickname || "Not set"}</p>
+            <p className="font-semibold text-lg">{user.name}</p>
           </div>
 
-          {editingNick && (
+          {editingName && (
             <div className="flex flex-col md:flex-row md:space-x-3 mt-2 space-y-2 md:space-y-0">
               <input
                 type="text"
-                className="flex-1 rounded-xl px-4 py-2 text-black text-base bg-white/20 backdrop-blur-sm placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-inner transition"
-                value={tempNick}
-                onChange={(e) => setTempNick(e.target.value)}
+                className="flex-1 rounded-xl px-4 py-2 text-black"
+                value={tempName}
+                onChange={(e) => setTempName(e.target.value)}
                 placeholder="Enter new nickname"
               />
               <button
-                onClick={handleSaveNick}
-                className="px-4 py-2 rounded-xl font-semibold text-white text-base bg-gradient-to-br from-purple-600 via-purple-400 to-purple-600 hover:brightness-110 transition shadow-lg"
+                onClick={handleSaveName}
+                disabled={loading}
+                className="px-4 py-2 rounded-xl font-semibold text-white bg-gradient-to-br from-purple-600 via-purple-400 to-purple-600"
               >
                 Save
               </button>
@@ -101,33 +128,47 @@ export default function UserProfile() {
 
           <button
             onClick={() => {
-              setEditingNick(true);
-              setTempNick(nickname);
+              setEditingName(true);
+              setTempName(user.name);
             }}
-            className="mt-2 px-4 py-2 rounded-xl font-semibold text-white text-base bg-gradient-to-br from-purple-600 via-purple-400 to-purple-600 hover:brightness-110 transition shadow-lg"
+            className="mt-2 px-4 py-2 rounded-xl font-semibold text-white bg-gradient-to-br from-purple-600 via-purple-400 to-purple-600"
           >
-            {nickname ? "Change Nickname" : "Set Nickname"}
+            Change Nickname
           </button>
         </div>
 
-        {/* Avatar selection */}
+        {/* Password Change */}
         <div className="flex flex-col space-y-3">
-          <p className="font-medium mb-2 text-center text-base">Choose Avatar</p>
-          <div className="flex flex-row justify-center flex-wrap gap-4">
-            {availableAvatars.map((a) => (
-              <button
-                key={a}
-                onClick={() => handleSelectAvatar(a)}
-                className={`text-5xl p-2 rounded-lg transition transform hover:scale-125 hover:rotate-3 bg-transparent border-none focus:outline-none ${
-                  avatar === a
-                    ? "ring-4 ring-purple-400 shadow-[0_0_20px_rgba(139,92,246,0.7)]"
-                    : ""
-                }`}
-              >
-                {a}
-              </button>
-            ))}
-          </div>
+          <p className="font-medium text-lg">Change Password</p>
+          <input
+            type="password"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            placeholder="Current Password"
+            className="rounded-xl px-4 py-2 text-black"
+          />
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="New Password"
+            className="rounded-xl px-4 py-2 text-black"
+          />
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm New Password"
+            className="rounded-xl px-4 py-2 text-black"
+          />
+          <button
+            onClick={handlePasswordChange}
+            disabled={loading}
+            className="px-4 py-2 rounded-xl font-semibold text-white bg-gradient-to-br from-purple-600 via-purple-400 to-purple-600"
+          >
+            Update Password
+          </button>
+          {message && <p className="text-sm mt-2">{message}</p>}
         </div>
       </div>
     </div>

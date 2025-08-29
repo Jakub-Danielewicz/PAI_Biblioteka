@@ -4,12 +4,12 @@ import HomePage from './pages/HomePage'
 import BookPage from './pages/BookPage'
 import BookRentalsPage from './pages/BookRentalsPage'
 import { Routes, Route } from 'react-router'
+import { useAuth } from "./context/AuthContext";
 import Layout from './components/Layout'
-import { useState } from 'react'
 import UserProfilePage from './pages/UserProfilePage'
 
 function App() {
-  const [isLoggedIn, _] = useState(true)
+  const { isLoggedIn } = useAuth();
 
   return (
     <Layout>
