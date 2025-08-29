@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { sequelize } from './models/index.js';
+import { authenticate } from "./middleware/authMiddleware.js";
+import authRoutes from "./routes/authRoutes.js";
 import bookRoutes from './routes/bookRoutes.js';
 import borrowRoutes from './routes/borrowRoutes.js';
 
@@ -15,6 +17,7 @@ app.use(express.json());
 
 app.use(bookRoutes);
 app.use(borrowRoutes);
+app.use("/api/auth", authRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend Express działa!');
