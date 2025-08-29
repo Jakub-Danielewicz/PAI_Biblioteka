@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { BookOpenIcon, ClockIcon, CheckCircleIcon, ExclamationCircleIcon, StarIcon } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
-import Navbar from "../components/Navbar";
 import CalendarWidget from "../components/CalendarWidget";
 
 const rentals = [
@@ -47,7 +46,6 @@ export default function BookRentalsPage() {
 
   return (
     <div className="w-full min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
       <main className="flex-1 p-6 flex flex-col lg:flex-row gap-6">
         <aside className="w-full lg:w-1/4 bg-white rounded-2xl shadow-md p-4">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">📅 Calendar</h2>

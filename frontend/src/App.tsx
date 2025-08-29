@@ -7,6 +7,7 @@ import { Routes, Route } from 'react-router'
 import { useAuth } from "./context/AuthContext";
 import Layout from './components/Layout'
 import UserProfilePage from './pages/UserProfilePage'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   const { isLoggedIn } = useAuth();
@@ -15,23 +16,41 @@ function App() {
     <Layout>
       <Routes>
         <Route
+          path="/login"
+          element={<LoginPage />}
+        />
+        <Route
           path="/"
-          element={isLoggedIn ? <HomePage /> : <LoginPage />}
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
         />
         <Route
           path='/book/:id'
-          element={<BookPage />}
+          element={
+            <ProtectedRoute>
+              <BookPage />
+            </ProtectedRoute>
+          }
         />
         <Route
           path='/rentals'
-          element={<BookRentalsPage />}
+          element={
+            <ProtectedRoute>
+              <BookRentalsPage />
+            </ProtectedRoute>
+          }
         />
-
-         <Route
+        <Route
           path='/profile'
-          element={<UserProfilePage />}
+          element={
+            <ProtectedRoute>
+              <UserProfilePage />
+            </ProtectedRoute>
+          }
         />
-
       </Routes>
     </Layout>
   )
