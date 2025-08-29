@@ -6,6 +6,7 @@ import { authenticate } from "./middleware/authMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import bookRoutes from './routes/bookRoutes.js';
 import borrowRoutes from './routes/borrowRoutes.js';
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(bookRoutes);
 app.use(borrowRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend Express działa!');
