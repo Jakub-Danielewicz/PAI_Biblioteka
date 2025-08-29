@@ -1,6 +1,5 @@
-import { Review } from "../models/review.js";
-import { Book } from "../models/book.js";
-import { User } from "../models/user.js";
+import { Review, Book, User } from "../models/index.js";
+
 
 export const addReview = async (req, res) => {
   try {
