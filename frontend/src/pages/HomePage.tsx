@@ -7,18 +7,20 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchBooks = async () => {
+    try {
+      const response = await api.get("/books");
+      setBooks(response.data.data);
+      setLoading(false);
+    } catch (e: any) {
+      console.log(e);
+      setError(e.response?.data?.message || "Failed to fetch books");
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        const response = await api.get("/books");
-        setBooks(response.data.data);
-        setLoading(false);
-      } catch (e: any) {
-        console.log(e);
-        setError(e.response?.data?.message || "Failed to fetch books");
-        setLoading(false);
-      }
-    })();
+    fetchBooks();
   }, []);
 
   if (loading) {
@@ -56,7 +58,12 @@ export default function HomePage() {
 
         <div className="grid gap-12 grid-cols-[repeat(auto-fit,minmax(350px,1fr))]">
           {books.map((book: any, index: number) => (
-            <BookCard key={book.ISBN_13} book={book} index={index} />
+            <BookCard 
+              key={book.ISBN_13} 
+              book={book} 
+              index={index} 
+              onBookBorrowed={fetchBooks}
+            />
           ))}
         </div>
       </main>

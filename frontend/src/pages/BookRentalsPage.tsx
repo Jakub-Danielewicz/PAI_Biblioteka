@@ -17,6 +17,7 @@ export default function BookRentalsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "ongoing" | "overdue" | "returned">("all");
+  const [returning, setReturning] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchRentals = async () => {
@@ -34,20 +35,50 @@ export default function BookRentalsPage() {
     fetchRentals();
   }, []);
 
+  const handleReturn = async (borrowId: number) => {
+    setReturning(borrowId);
+    try {
+      await api.post('/return', { borrowId });
+      // Refresh the rentals list
+      const response = await api.get("/borrows");
+      setRentals(response.data || []);
+    } catch (error: any) {
+      console.error('Failed to return book:', error);
+      alert(error.response?.data?.error || 'Failed to return book');
+    } finally {
+      setReturning(null);
+    }
+  };
+
   const filteredRentals = rentals
     .filter((rental) => {
-      const deadlineDate = new Date(rental.deadline);
-      if (filter === "ongoing") return !rental.returned && deadlineDate >= today;
-      if (filter === "overdue") return !rental.returned && deadlineDate < today;
-      if (filter === "returned") return rental.returned;
+      const borrowDate = new Date(rental.borrowedAt);
+      const dueDate = new Date(borrowDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from borrow date
+      const isReturned = rental.returnedAt !== null;
+      
+      if (filter === "ongoing") return !isReturned && dueDate >= today;
+      if (filter === "overdue") return !isReturned && dueDate < today;
+      if (filter === "returned") return isReturned;
       return true;
     })
-    .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime());
+    .sort((a, b) => {
+      const dueDateA = new Date(new Date(a.borrowedAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      const dueDateB = new Date(new Date(b.borrowedAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      return dueDateA.getTime() - dueDateB.getTime();
+    });
 
   const sections = {
-    Ongoing: filteredRentals.filter(b => !b.returned && new Date(b.deadline) >= today),
-    Returned: filteredRentals.filter(b => b.returned),
-    Overdue: filteredRentals.filter(b => !b.returned && new Date(b.deadline) < today),
+    Ongoing: filteredRentals.filter(b => {
+      const isReturned = b.returnedAt !== null;
+      const dueDate = new Date(new Date(b.borrowedAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      return !isReturned && dueDate >= today;
+    }),
+    Returned: filteredRentals.filter(b => b.returnedAt !== null),
+    Overdue: filteredRentals.filter(b => {
+      const isReturned = b.returnedAt !== null;
+      const dueDate = new Date(new Date(b.borrowedAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      return !isReturned && dueDate < today;
+    }),
   };
 
   const sectionOrder: (keyof typeof sections)[] = ["Ongoing", "Returned", "Overdue"];
@@ -120,18 +151,20 @@ export default function BookRentalsPage() {
                 </h2>
 
                 <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
-                  {books.map((book) => {
-                    const deadlineDate = new Date(book.deadline);
+                  {books.map((rental) => {
+                    const borrowDate = new Date(rental.borrowedAt);
+                    const dueDate = new Date(borrowDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+                    const isReturned = rental.returnedAt !== null;
 
                     let statusColor = "border-gray-400";
                     let textColor = "text-gray-600";
                     let statusText = "";
 
-                    if (book.returned) {
+                    if (isReturned) {
                       statusText = "Returned";
                       statusColor = "border-gray-400";
                       textColor = "text-gray-500";
-                    } else if (deadlineDate < today) {
+                    } else if (dueDate < today) {
                       statusText = "Overdue!";
                       statusColor = "border-red-500";
                       textColor = "text-red-600";
@@ -143,28 +176,32 @@ export default function BookRentalsPage() {
 
                     return (
                       <motion.div
-                        key={book.id}
+                        key={rental.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: 0.1 }}
                         className={`bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg p-5 border-l-8 ${statusColor} transition transform hover:scale-105 hover:shadow-2xl flex flex-col gap-3`}
                       >
-                        <div className="flex items-center gap-4">
-                          <BookOpenIcon className="w-10 h-10 text-blue-500 flex-shrink-0" />
-                          <div className="flex-1">
-                            <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{book.title}</h3>
-                            <p className="text-gray-500 text-sm">Author: {book.author}</p>
-                            <p className="text-gray-500 text-sm">Deadline: {deadlineDate.toDateString()}</p>
+                        <div className="flex items-start justify-between gap-4 mb-3">
+                          <div className="flex items-center gap-4">
+                            <BookOpenIcon className="w-10 h-10 text-blue-500 flex-shrink-0" />
+                            <div className="flex-1">
+                              <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{rental.copy.book.title}</h3>
+                              <p className="text-gray-500 text-sm">Author: {rental.copy.book.author}</p>
+                              <p className="text-gray-500 text-sm">Borrowed: {borrowDate.toDateString()}</p>
+                              <p className="text-gray-500 text-sm">Due: {dueDate.toDateString()}</p>
+                            </div>
                           </div>
-                        </div>
-
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: 5 }, (_, i) => (
-                            <StarIcon
-                              key={i}
-                              className={`w-5 h-5 ${i < book.rating ? "text-yellow-400" : "text-gray-300"}`}
-                            />
-                          ))}
+                          
+                          {!isReturned && (
+                            <button
+                              onClick={() => handleReturn(rental.id)}
+                              disabled={returning === rental.id}
+                              className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium text-sm transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {returning === rental.id ? 'Returning...' : 'Return Book'}
+                            </button>
+                          )}
                         </div>
 
                         <p className={`font-medium ${textColor}`}>{statusText}</p>
