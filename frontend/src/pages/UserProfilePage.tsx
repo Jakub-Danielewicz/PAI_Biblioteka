@@ -1,4 +1,5 @@
 import { useState } from "react";
+import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 
 export default function UserProfile() {
@@ -18,26 +19,14 @@ export default function UserProfile() {
   const handleSaveName = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/change-nickname", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ name: tempName }),
-      });
+      const response = await api.put("/api/user", { name: tempName });
 
-      const data = await res.json();
-      if (res.ok) {
-        // ✅ Update context with new name
-        login(localStorage.getItem("token")!, { ...user, name: data.name });
-        setEditingName(false);
-        setMessage("Nickname updated successfully!");
-      } else {
-        setMessage(data.message || "Error updating nickname");
-      }
-    } catch {
-      setMessage("Server error");
+      login(localStorage.getItem("token")!, response.data.user);
+      setEditingName(false);
+      setMessage("Nickname updated successfully!");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Error updating nickname";
+      setMessage(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -51,125 +40,174 @@ export default function UserProfile() {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/change-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ oldPassword, newPassword }),
+      await api.put("/api/user", {
+        currentPassword: oldPassword,
+        newPassword: newPassword
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        setMessage("Password updated successfully!");
-        setOldPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      } else {
-        setMessage(data.message || "Error changing password");
-      }
-    } catch {
-      setMessage("Server error");
+      setMessage("Password updated successfully!");
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Error changing password";
+      setMessage(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-purple-800 to-slate-900 flex items-center justify-center p-8">
-      <div className="w-full max-w-xl bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 flex flex-col p-10 space-y-8 text-white">
-        
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex flex-row items-center justify-center space-x-4">
-          <h1 className="text-3xl font-extrabold drop-shadow-lg">{user.name}</h1>
-        </div>
-
-        {/* Info */}
-        <div className="flex flex-col space-y-4">
-          {[
-            { label: "Email", value: user.email },
-          ].map((info) => (
-            <div
-              key={info.label}
-              className="p-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition"
-            >
-              <p className="text-base opacity-90">{info.label}</p>
-              <p className="font-semibold text-lg">{info.value}</p>
+        <div className="text-center mb-8">
+          <div className="relative inline-block">
+            <div className="w-24 h-24 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-xl mb-4 mx-auto">
+              {user.name.charAt(0).toUpperCase()}
             </div>
-          ))}
+            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-400 rounded-full border-4 border-white"></div>
+          </div>
+          <h1 className="text-4xl font-bold text-white mb-2">{user.name}</h1>
+          <p className="text-purple-200 text-lg">{user.email}</p>
         </div>
 
-        {/* Change Name */}
-        <div className="flex flex-col space-y-3">
-          <div className="flex items-center space-x-2">
-            <p className="font-medium text-base">Nickname:</p>
-            <p className="font-semibold text-lg">{user.name}</p>
+        {/* Content Cards */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          
+          {/* Profile Info Card */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl flex items-center justify-center mr-4">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-white">Profile Information</h2>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <label className="block text-purple-200 text-sm font-medium mb-2">Display Name</label>
+                <div className="flex items-center justify-between">
+                  <span className="text-white text-lg font-medium">{user.name}</span>
+                  {!editingName ? (
+                    <button
+                      onClick={() => {
+                        setEditingName(true);
+                        setTempName(user.name);
+                      }}
+                      className="text-purple-300 hover:text-white transition-colors duration-200 p-2 hover:bg-white/10 rounded-lg"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+
+              {editingName && (
+                <div className="bg-white/5 rounded-xl p-4 border border-white/10 space-y-3">
+                  <label className="block text-purple-200 text-sm font-medium">New Display Name</label>
+                  <div className="flex space-x-3">
+                    <input
+                      type="text"
+                      className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+                      value={tempName}
+                      onChange={(e) => setTempName(e.target.value)}
+                      placeholder="Enter new display name"
+                    />
+                    <button
+                      onClick={handleSaveName}
+                      disabled={loading}
+                      className="px-6 py-3 bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                    >
+                      {loading ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      onClick={() => setEditingName(false)}
+                      className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg transition-all duration-200 border border-white/20"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <label className="block text-purple-200 text-sm font-medium mb-2">Email Address</label>
+                <span className="text-white text-lg">{user.email}</span>
+              </div>
+            </div>
           </div>
 
-          {editingName && (
-            <div className="flex flex-col md:flex-row md:space-x-3 mt-2 space-y-2 md:space-y-0">
-              <input
-                type="text"
-                className="flex-1 rounded-xl px-4 py-2 text-black"
-                value={tempName}
-                onChange={(e) => setTempName(e.target.value)}
-                placeholder="Enter new nickname"
-              />
+          {/* Security Card */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-red-400 to-pink-400 rounded-xl flex items-center justify-center mr-4">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-white">Security Settings</h2>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <label className="block text-purple-200 text-sm font-medium mb-3">Current Password</label>
+                <input
+                  type="password"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  placeholder="Enter your current password"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+                />
+              </div>
+              
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <label className="block text-purple-200 text-sm font-medium mb-3">New Password</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter your new password"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+                />
+              </div>
+              
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <label className="block text-purple-200 text-sm font-medium mb-3">Confirm New Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm your new password"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+                />
+              </div>
+              
               <button
-                onClick={handleSaveName}
-                disabled={loading}
-                className="px-4 py-2 rounded-xl font-semibold text-white bg-gradient-to-br from-purple-600 via-purple-400 to-purple-600"
+                onClick={handlePasswordChange}
+                disabled={loading || !oldPassword || !newPassword || !confirmPassword}
+                className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg mt-6"
               >
-                Save
+                {loading ? "Updating Password..." : "Update Password"}
               </button>
             </div>
-          )}
-
-          <button
-            onClick={() => {
-              setEditingName(true);
-              setTempName(user.name);
-            }}
-            className="mt-2 px-4 py-2 rounded-xl font-semibold text-white bg-gradient-to-br from-purple-600 via-purple-400 to-purple-600"
-          >
-            Change Nickname
-          </button>
+          </div>
         </div>
 
-        {/* Password Change */}
-        <div className="flex flex-col space-y-3">
-          <p className="font-medium text-lg">Change Password</p>
-          <input
-            type="password"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            placeholder="Current Password"
-            className="rounded-xl px-4 py-2 text-black"
-          />
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="New Password"
-            className="rounded-xl px-4 py-2 text-black"
-          />
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm New Password"
-            className="rounded-xl px-4 py-2 text-black"
-          />
-          <button
-            onClick={handlePasswordChange}
-            disabled={loading}
-            className="px-4 py-2 rounded-xl font-semibold text-white bg-gradient-to-br from-purple-600 via-purple-400 to-purple-600"
-          >
-            Update Password
-          </button>
-          {message && <p className="text-sm mt-2">{message}</p>}
-        </div>
+        {/* Status Message */}
+        {message && (
+          <div className={`mt-8 p-4 rounded-lg text-center font-medium ${
+            message.includes('successfully') 
+              ? 'bg-green-500/20 text-green-200 border border-green-400/30' 
+              : 'bg-red-500/20 text-red-200 border border-red-400/30'
+          }`}>
+            {message}
+          </div>
+        )}
       </div>
     </div>
   );
