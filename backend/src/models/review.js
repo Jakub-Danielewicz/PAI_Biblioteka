@@ -1,10 +1,7 @@
 import { DataTypes } from "sequelize";
-import sequelize from "./index.js";
-import { User } from "./user.js";
-import { Book } from "./book.js";
 
-export default function(sequelize) => {
-  const sequelize.define('Review', {
+export default (sequelize) => {
+  const Review = sequelize.define('Review', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
@@ -26,6 +23,6 @@ export default function(sequelize) => {
     tableName: 'reviews',
     timestamps: false,
   });
-  return Book;
+  return Review;
 }
 

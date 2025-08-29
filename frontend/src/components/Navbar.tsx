@@ -1,9 +1,10 @@
-import { Link, useLocation } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { useState } from 'react'
 import userIcon from '../assets/svgs/user.svg'
 
 export default function Navbar() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const navItems = [
@@ -34,7 +35,7 @@ export default function Navbar() {
                 className={`text-sm font-medium transition-colors ${isActive(item.path)
                   ? 'text-indigo-600'
                   : 'text-gray-700 hover:text-indigo-600'
-                  }`}
+                }`}
               >
                 {item.label}
               </Link>
@@ -43,7 +44,10 @@ export default function Navbar() {
 
           <div className="flex items-center space-x-4">
             {/* User */}
-            <button className="p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors">
+            <button
+              className="p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+              onClick={() => navigate('/profile')}
+            >
               <img src={userIcon} alt="User" className="w-6 h-6 opacity-60" />
             </button>
 
@@ -74,7 +78,7 @@ export default function Navbar() {
                 className={`block px-3 py-2 text-sm font-medium ${isActive(item.path)
                   ? 'text-indigo-600 bg-indigo-50'
                   : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                }`}
               >
                 {item.label}
               </Link>
