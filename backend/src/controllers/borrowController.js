@@ -82,31 +82,38 @@ export async function borrowCopy(req, res) {
   }
 }
 
-// POST /return { userId, copyId }
+// POST /return { borrowId }
 export async function returnCopy(req, res) {
-  const { userId, copyId } = req.body;
-  if (!userId || !copyId) {
-    return res.status(400).json({ error: 'userId and copyId are required' });
+  const { borrowId } = req.body;
+  if (!borrowId) {
+    return res.status(400).json({ error: 'borrowId is required' });
   }
   try {
     const borrow = await Borrow.findOne({
       where: {
-        userId,
-        copyId,
+        id: borrowId,
+        userId: req.user.id,
         returnedAt: null,
       },
+      include: [
+        { model: Copy, as: 'copy' }
+      ]
     });
     if (!borrow) {
       return res.status(404).json({ error: 'Active borrow not found' });
     }
+    
     borrow.returnedAt = new Date();
     await borrow.save();
-    const copy = await Copy.findByPk(copyId);
+    
+    const copy = borrow.copy;
     if (copy) {
       copy.status = 'available';
+      copy.borrowedBy = null;
       await copy.save();
     }
-    return res.json({ message: 'Copy returned successfully', borrow });
+    
+    return res.json({ message: 'Book returned successfully', borrow });
   } catch (err) {
     return res.status(500).json({ error: 'Internal server error', details: err.message });
   }
