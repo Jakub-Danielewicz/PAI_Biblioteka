@@ -18,8 +18,8 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-app.use(bookRoutes);
-app.use(borrowRoutes);
+app.use("/api", bookRoutes);
+app.use("/api", borrowRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/reviews", reviewRoutes);

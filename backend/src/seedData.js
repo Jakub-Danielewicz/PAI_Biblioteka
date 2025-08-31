@@ -103,9 +103,9 @@ export async function seedDatabase() {
     console.log('Inserting book copies...');
     for (const book of mockBooks) {
       await Copy.bulkCreate([
-        { ISBN_13: book.ISBN_13, status: 'available' },
-        { ISBN_13: book.ISBN_13, status: 'available' },
-        { ISBN_13: book.ISBN_13, status: 'borrowed', borrowedBy: 1 }
+        { ISBN_13: book.ISBN_13, status: 'dostępny' },
+        { ISBN_13: book.ISBN_13, status: 'dostępny' },
+        { ISBN_13: book.ISBN_13, status: 'wypożyczony', borrowedBy: 1 }
       ]);
     }
 

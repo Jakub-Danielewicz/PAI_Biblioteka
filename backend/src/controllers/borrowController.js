@@ -152,9 +152,9 @@ export async function updateBorrow(req, res) {
   }
 }
 
-// POST /return { borrowId }
+// PATCH /borrows/:id/return
 export async function returnCopy(req, res) {
-  const { borrowId } = req.body;
+  const borrowId = req.params.id;
   if (!borrowId) {
     return res.status(400).json({ error: 'borrowId is required' });
   }

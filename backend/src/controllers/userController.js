@@ -55,13 +55,7 @@ export const deleteUserById = async (req, res) => {
       });
     }
 
-    // Delete user's reviews first (due to foreign key constraints)
-    await Review.destroy({ where: { userId: targetUserId } });
-    
-    // Delete user's borrow history
-    await Borrow.destroy({ where: { userId: targetUserId } });
-    
-    // Delete the user account
+    // Delete the user account (CASCADE will handle reviews, borrows, and favorites)
     await targetUser.destroy();
 
     res.json({ message: "User deleted successfully" });
