@@ -83,6 +83,75 @@ export async function borrowCopy(req, res) {
   }
 }
 
+// PATCH /borrows/:id { dueDate }
+export async function updateBorrow(req, res) {
+  const { id } = req.params;
+  const { dueDate } = req.body;
+  
+  if (!dueDate) {
+    return res.status(400).json({ error: 'dueDate is required' });
+  }
+
+  try {
+    const borrow = await Borrow.findOne({
+      where: {
+        id: id,
+        userId: req.user.id,
+        returnedAt: null,
+      },
+      include: [{ model: Copy, as: 'copy', include: [{ model: Book, as: 'book' }] }]
+    });
+
+    if (!borrow) {
+      return res.status(404).json({ error: 'Active borrow not found' });
+    }
+
+    const newDueDate = new Date(dueDate);
+    const currentDueDate = new Date(borrow.dueDate);
+    
+    if (newDueDate <= currentDueDate) {
+      return res.status(400).json({ error: 'New due date must be later than current due date' });
+    }
+
+    // Check max 60 days from original borrow
+    const borrowDate = new Date(borrow.borrowedAt);
+    const maxDueDate = new Date();
+    maxDueDate.setDate(borrowDate.getDate() + 60);
+    
+    if (newDueDate > maxDueDate) {
+      return res.status(400).json({ error: 'Cannot extend beyond 60 days from original borrow date' });
+    }
+
+    // Check availability during extension period
+    const conflictingBorrows = await Borrow.findAll({
+      where: {
+        id: { [Op.ne]: id },
+        returnedAt: null,
+      },
+      include: [{ model: Copy, as: 'copy', where: { ISBN_13: borrow.copy.ISBN_13 } }]
+    });
+
+    const hasConflict = conflictingBorrows.some(cb => {
+      const cbDueDate = new Date(cb.dueDate);
+      return cbDueDate > currentDueDate && cbDueDate <= newDueDate;
+    });
+
+    if (hasConflict) {
+      return res.status(400).json({ 
+        error: 'Book not available during requested period' 
+      });
+    }
+
+    borrow.dueDate = newDueDate;
+    await borrow.save();
+
+    return res.json({ message: 'Rental extended successfully', borrow });
+  } catch (err) {
+    console.error('Error updating borrow:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
 // POST /return { borrowId }
 export async function returnCopy(req, res) {
   const { borrowId } = req.body;
