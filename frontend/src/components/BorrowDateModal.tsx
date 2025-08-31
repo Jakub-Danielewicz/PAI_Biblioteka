@@ -27,7 +27,7 @@ export default function BorrowDateModal({
 
   const handleConfirm = () => {
     if (!selectedDate) {
-      alert('Please select a return date');
+      alert('Proszę wybrać datę zwrotu');
       return;
     }
     onConfirm(selectedDate);
@@ -38,13 +38,13 @@ export default function BorrowDateModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
-        <h2 className="text-lg font-bold mb-4">Borrow Book</h2>
+        <h2 className="text-lg font-bold mb-4">Wypożycz książkę</h2>
         
         <p className="text-sm text-gray-600 mb-4">
           <strong>{bookTitle}</strong>
         </p>
 
-        <label className="block text-sm font-medium mb-2">Return Date:</label>
+        <label className="block text-sm font-medium mb-2">Data zwrotu:</label>
         <input
           type="date"
           value={selectedDate}
@@ -61,14 +61,14 @@ export default function BorrowDateModal({
             className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
             disabled={loading}
           >
-            Cancel
+            Anuluj
           </button>
           <button
             onClick={handleConfirm}
             disabled={loading || !selectedDate}
             className="flex-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
           >
-            {loading ? 'Borrowing...' : 'Borrow'}
+            {loading ? 'Wypożyczanie...' : 'Wypożycz'}
           </button>
         </div>
       </div>

@@ -17,8 +17,14 @@ export default function BookDetails({ book }: BookDetailsProps) {
   const [reviews, setReviews] = useState<any[]>([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [loadingReviews, setLoadingReviews] = useState(true);
+  const [starFilter, setStarFilter] = useState<number | null>(null);
   
   const averageRating = calculateAverageRating(reviews);
+  
+  // Filter reviews by star rating
+  const filteredReviews = starFilter 
+    ? reviews.filter(review => review.rating === starFilter)
+    : reviews;
   
   // Check if current user has already reviewed this book
   const userReview = user ? reviews.find(review => review.user?.id === user.id) : null;
@@ -70,31 +76,69 @@ export default function BookDetails({ book }: BookDetailsProps) {
       >
         {/* Description */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">📖 Description</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">📖 Opis</h2>
           <p className="text-gray-700 leading-relaxed">
-            {book.description || "No description available for this book."}
+            {book.description || "Brak opisu dla tej książki."}
           </p>
         </div>
 
         {/* Reviews */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">⭐ Reviews ({reviews.length})</h2>
-            {canReview && !showReviewForm && (
-              <button
-                onClick={() => setShowReviewForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200"
-              >
-                <PlusIcon className="w-4 h-4" />
-                Write Review
-              </button>
-            )}
-            {userReview && (
-              <div className="text-sm text-gray-600 bg-gray-100 px-3 py-2 rounded-lg">
-                You've already reviewed this book
-              </div>
-            )}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">⭐ Recenzje ({reviews.length})</h2>
+            <div className="flex items-center gap-3">
+              {canReview && !showReviewForm && (
+                <button
+                  onClick={() => setShowReviewForm(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  Napisz recenzję
+                </button>
+              )}
+              {userReview && (
+                <div className="text-sm text-gray-600 bg-gray-100 px-3 py-2 rounded-lg">
+                  Już recenzowałeś tę książkę
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Star Filter */}
+          {reviews.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 mb-6 pb-4 border-b border-gray-200">
+              <span className="text-sm font-medium text-gray-700 mr-2">Filtruj według oceny:</span>
+              <button
+                onClick={() => setStarFilter(null)}
+                className={`px-3 py-1 text-sm rounded-full transition-all ${
+                  starFilter === null
+                    ? 'bg-gray-800 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Wszystkie
+              </button>
+              {[5, 4, 3, 2, 1].map((stars) => (
+                <button
+                  key={stars}
+                  onClick={() => setStarFilter(stars)}
+                  className={`flex items-center gap-1 px-3 py-1 text-sm rounded-full transition-all ${
+                    starFilter === stars
+                      ? 'bg-yellow-400 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {stars}
+                  <StarIcon className="w-3 h-3" />
+                </button>
+              ))}
+              {starFilter && (
+                <span className="text-sm text-gray-500 ml-2">
+                  ({filteredReviews.length} recenzji)
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Review Form */}
           {showReviewForm && (
@@ -110,11 +154,12 @@ export default function BookDetails({ book }: BookDetailsProps) {
           {/* Reviews List */}
           {loadingReviews ? (
             <div className="text-center py-8">
-              <p className="text-gray-500">Loading reviews...</p>
+              <p className="text-gray-500">Ładowanie recenzji...</p>
             </div>
           ) : reviews.length > 0 ? (
-            <div className="space-y-4">
-              {reviews.map((review: any, index: number) => (
+            filteredReviews.length > 0 ? (
+              <div className="space-y-4">
+                {filteredReviews.map((review: any, index: number) => (
                 <motion.div
                   key={review.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -157,11 +202,22 @@ export default function BookDetails({ book }: BookDetailsProps) {
                 </motion.div>
               ))}
             </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Brak recenzji o wybranej ocenie.</p>
+                <button
+                  onClick={() => setStarFilter(null)}
+                  className="text-blue-600 hover:text-blue-800 text-sm mt-2 underline"
+                >
+                  Pokaż wszystkie recenzje
+                </button>
+              </div>
+            )
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">No reviews available for this book yet.</p>
+              <p className="text-gray-500">Brak dostępnych recenzji dla tej książki.</p>
               {canReview && (
-                <p className="text-gray-400 text-sm mt-2">Be the first to review it!</p>
+                <p className="text-gray-400 text-sm mt-2">Bądź pierwszy, który ją zrecenzuje!</p>
               )}
             </div>
           )}
@@ -177,16 +233,16 @@ export default function BookDetails({ book }: BookDetailsProps) {
       >
         {/* Copies Info */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">📚 Available Copies</h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-4">📚 Dostępne Egzemplarze</h3>
           {book.copies?.map((copy: any) => (
             <div key={copy.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-              <span className="text-gray-600">Copy #{copy.id}</span>
+              <span className="text-gray-600">Egzemplarz #{copy.id}</span>
               <span className={`px-2 py-1 rounded text-xs font-medium ${
                 copy.status === 'available' 
                   ? 'bg-green-100 text-green-800' 
                   : 'bg-red-100 text-red-800'
               }`}>
-                {copy.status}
+                {copy.status === 'available' ? 'dostępny' : 'wypożyczony'}
               </span>
             </div>
           ))}
@@ -194,15 +250,15 @@ export default function BookDetails({ book }: BookDetailsProps) {
 
         {/* Book Stats */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">📊 Book Stats</h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-4">📊 Statystyki Książki</h3>
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-600">Total Reviews</span>
+              <span className="text-gray-600">Łączna liczba recenzji</span>
               <span className="font-semibold">{reviews.length}</span>
             </div>
             {reviews.length > 0 && (
               <div className="flex justify-between">
-                <span className="text-gray-600">Average Rating</span>
+                <span className="text-gray-600">Średnia ocena</span>
                 <div className="flex items-center gap-1">
                   <StarIcon className="w-4 h-4 text-yellow-400" />
                   <span className="font-semibold">{averageRating.toFixed(1)}</span>
@@ -210,15 +266,15 @@ export default function BookDetails({ book }: BookDetailsProps) {
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-gray-600">Publication Year</span>
+              <span className="text-gray-600">Rok wydania</span>
               <span className="font-semibold">{book.year}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Total Copies</span>
+              <span className="text-gray-600">Łącznie egzemplarzy</span>
               <span className="font-semibold">{totalCopies}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Available Now</span>
+              <span className="text-gray-600">Dostępne teraz</span>
               <span className="font-semibold">{availableCopies}</span>
             </div>
           </div>

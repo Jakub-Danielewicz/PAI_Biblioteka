@@ -3,7 +3,7 @@ import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 
 export default function UserProfile() {
-  const { user, login } = useAuth(); // Get user from context
+  const { user, login, logout } = useAuth(); // Get user from context
   const [loading, setLoading] = useState(false);
 
   const [editingName, setEditingName] = useState(false);
@@ -14,6 +14,10 @@ export default function UserProfile() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
   if (!user) return <p className="text-white">User not logged in</p>;
 
   const handleSaveName = async () => {
@@ -23,9 +27,9 @@ export default function UserProfile() {
 
       login(localStorage.getItem("token")!, response.data.user);
       setEditingName(false);
-      setMessage("Nickname updated successfully!");
+      setMessage("Nazwa użytkownika zaktualizowana pomyślnie!");
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Error updating nickname";
+      const errorMessage = error.response?.data?.message || "Błąd podczas aktualizacji nazwy użytkownika";
       setMessage(errorMessage);
     } finally {
       setLoading(false);
@@ -34,7 +38,7 @@ export default function UserProfile() {
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
-      setMessage("New passwords do not match!");
+      setMessage("Nowe hasła nie są identyczne!");
       return;
     }
 
@@ -45,15 +49,39 @@ export default function UserProfile() {
         newPassword: newPassword
       });
 
-      setMessage("Password updated successfully!");
+      setMessage("Hasło zaktualizowane pomyślnie!");
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Error changing password";
+      const errorMessage = error.response?.data?.message || "Błąd podczas zmiany hasła";
       setMessage(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword) {
+      setMessage("Proszę wpisać hasło aby usunąć konto");
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await api.delete("/api/user", {
+        data: { password: deletePassword }
+      });
+
+      setMessage("Konto zostało usunięte pomyślnie");
+      logout(); // Log out and redirect to login
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Błąd podczas usuwania konta";
+      setMessage(errorMessage);
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+      setDeletePassword("");
     }
   };
 
@@ -74,7 +102,7 @@ export default function UserProfile() {
 
         {/* Content Cards */}
         <div className="grid lg:grid-cols-2 gap-8">
-          
+
           {/* Profile Info Card */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
             <div className="flex items-center mb-6">
@@ -83,9 +111,9 @@ export default function UserProfile() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-white">Profile Information</h2>
+              <h2 className="text-2xl font-bold text-white">Informacje Profilu</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div className="bg-white/5 rounded-xl p-4 border border-white/10">
                 <label className="block text-purple-200 text-sm font-medium mb-2">Display Name</label>
@@ -136,7 +164,7 @@ export default function UserProfile() {
               )}
 
               <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <label className="block text-purple-200 text-sm font-medium mb-2">Email Address</label>
+                <label className="block text-purple-200 text-sm font-medium mb-2">Adres email</label>
                 <span className="text-white text-lg">{user.email}</span>
               </div>
             </div>
@@ -152,59 +180,110 @@ export default function UserProfile() {
               </div>
               <h2 className="text-2xl font-bold text-white">Security Settings</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <label className="block text-purple-200 text-sm font-medium mb-3">Current Password</label>
+                <label className="block text-purple-200 text-sm font-medium mb-3">Aktualne hasło</label>
                 <input
                   type="password"
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
-                  placeholder="Enter your current password"
+                  placeholder="Wpisz swoje aktualne hasło"
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                 />
               </div>
-              
+
               <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <label className="block text-purple-200 text-sm font-medium mb-3">New Password</label>
+                <label className="block text-purple-200 text-sm font-medium mb-3">Nowe hasło</label>
                 <input
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter your new password"
+                  placeholder="Wpisz nowe hasło"
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                 />
               </div>
-              
+
               <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <label className="block text-purple-200 text-sm font-medium mb-3">Confirm New Password</label>
+                <label className="block text-purple-200 text-sm font-medium mb-3">Potwierdź nowe hasło</label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm your new password"
+                  placeholder="Potwierdź nowe hasło"
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                 />
               </div>
-              
+
               <button
                 onClick={handlePasswordChange}
                 disabled={loading || !oldPassword || !newPassword || !confirmPassword}
                 className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg mt-6"
               >
-                {loading ? "Updating Password..." : "Update Password"}
+                {loading ? "Aktualizowanie hasła..." : "Zaktualizuj hasło"}
               </button>
             </div>
           </div>
         </div>
 
+        {/* Danger Zone */}
+        <div className="mt-8 bg-red-900/20 border border-red-500/30 rounded-2xl p-6">
+          <h2 className="text-xl font-bold text-red-300 mb-4">⚠️ Strefa Niebezpieczna</h2>
+          <p className="text-red-200 mb-4">Po usunięciu konta nie ma możliwości powrotu. Upewnij się co robisz.</p>
+
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg"
+          >
+            Usuń konto
+          </button>
+        </div>
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-gray-800 rounded-2xl p-6 max-w-md w-full">
+              <h3 className="text-xl font-bold text-white mb-4">Potwierdź usunięcie konta</h3>
+              <p className="text-gray-300 mb-4">
+                Ta akcja jest nieodwracalna. Wpisz swoje hasło aby potwierdzić:
+              </p>
+
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                placeholder="Wpisz swoje hasło"
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent mb-6"
+              />
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeletePassword("");
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-all duration-200"
+                >
+                  Anuluj
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleting || !deletePassword}
+                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {deleting ? "Usuwanie..." : "Usuń konto"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Status Message */}
         {message && (
-          <div className={`mt-8 p-4 rounded-lg text-center font-medium ${
-            message.includes('successfully') 
-              ? 'bg-green-500/20 text-green-200 border border-green-400/30' 
-              : 'bg-red-500/20 text-red-200 border border-red-400/30'
-          }`}>
+          <div className={`mt-8 p-4 rounded-lg text-center font-medium ${message.includes('successfully')
+            ? 'bg-green-500/20 text-green-200 border border-green-400/30'
+            : 'bg-red-500/20 text-red-200 border border-red-400/30'
+            }`}>
             {message}
           </div>
         )}
