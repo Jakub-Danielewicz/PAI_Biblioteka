@@ -92,7 +92,7 @@ useEffect(() => {
         <input name="title" placeholder="Tytuł" value={form.title} onChange={handleChange} required className="border p-2" />
         <input name="author" placeholder="Autor" value={form.author} onChange={handleChange} required className="border p-2" />
         <input name="publisher" placeholder="Wydawca" value={form.publisher} onChange={handleChange} className="border p-2" />
-        <input name="year" type="number" placeholder="Rok wydania" value={form.year || ""} onChange={handleChange} className="border p-2" />
+        <input name="year" type="number" placeholder="Rok wydania" value={form.year || ""} onChange={handleChange} min="1000" max={new Date().getFullYear()} className="border p-2" />
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Dodaj książkę</button>
       </form>
 

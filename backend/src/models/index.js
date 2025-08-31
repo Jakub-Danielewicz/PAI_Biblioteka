@@ -31,7 +31,7 @@ Copy.belongsTo(User, {
   as: 'borrower',
 });
 Copy.hasMany(Borrow, { foreignKey: 'copyId', as: 'borrows' });
-User.hasMany(Borrow, { foreignKey: 'userId', as: 'borrows' });
+User.hasMany(Borrow, { foreignKey: 'userId', as: 'borrows', onDelete: 'CASCADE' });
 Borrow.belongsTo(Copy, { foreignKey: 'copyId', as: 'copy' });
 Borrow.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
