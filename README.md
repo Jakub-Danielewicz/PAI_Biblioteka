@@ -61,6 +61,17 @@ npm run dev
 ```
 Serwer będzie dostępny pod adresem: `http://localhost:3001`
 
+**Uwaga:** Projekt zawiera gotową bazę danych SQLite (`database.sqlite`) z przykładowymi danymi testowymi, w tym:
+- 8 książek z opisami
+- 3 użytkowników testowych
+- Przykładowe wypożyczenia (w tym przeterminowane)
+- Recenzje i ulubione książki
+
+W razie potrzeby można zregenerować dane testowe poleceniem:
+```bash
+npm run seed
+```
+
 ### **Frontend:**
 ```bash
 cd frontend
@@ -140,7 +151,7 @@ Wszystkie endpointy używają prefiksu `/api` i wymagają tokenu JWT (oprócz pu
 | Metoda | Endpoint | Opis |
 |--------|----------|------|
 | `GET` | `/api/user` | Lista wszystkich użytkowników |
-| `DELETE` | `/api/user/:id` | Usunięcie użytkownika |
+| `DELETE` | `/api/user/:id` | Usunięcie użytkownika przez ID |
 
 #### **Zarządzanie książkami:**
 | Metoda | Endpoint | Opis |
