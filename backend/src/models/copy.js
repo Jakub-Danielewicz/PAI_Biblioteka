@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
 
-export default function(sequelize) {
+export default function (sequelize) {
   const Copy = sequelize.define('Copy', {
     id: {
       type: DataTypes.INTEGER,
@@ -19,7 +19,7 @@ export default function(sequelize) {
     status: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'available',
+      defaultValue: 'dostępny',
     },
   }, {
     tableName: 'copies',

@@ -33,7 +33,7 @@ export default function BookDetails({ book }: BookDetailsProps) {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await api.get(`/api/reviews/${book.ISBN_13}`);
+        const response = await api.get(`/reviews/${book.ISBN_13}`);
         setReviews(response.data || []);
       } catch (error) {
         console.error('Failed to fetch reviews:', error);
@@ -57,7 +57,7 @@ export default function BookDetails({ book }: BookDetailsProps) {
     if (!confirm('Are you sure you want to delete your review?')) return;
 
     try {
-      await api.delete(`/api/reviews/${reviewId}`);
+      await api.delete(`/reviews/${reviewId}`);
       setReviews(reviews.filter(review => review.id !== reviewId));
     } catch (error: any) {
       console.error('Failed to delete review:', error);

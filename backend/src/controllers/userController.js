@@ -1,6 +1,70 @@
 import { User, Borrow, Review } from "../models/index.js";
 import bcrypt from 'bcrypt';
 
+// GET /users - Admin only
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      attributes: ['id', 'name', 'email', 'createdAt'],
+      order: [['createdAt', 'DESC']]
+    });
+    
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// DELETE /users/:id - Admin only
+export const deleteUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const targetUserId = parseInt(id);
+    
+    if (isNaN(targetUserId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    
+    // Prevent admin from deleting themselves
+    if (targetUserId === req.user.id) {
+      return res.status(400).json({ message: "Cannot delete your own account" });
+    }
+    
+    const targetUser = await User.findByPk(targetUserId);
+    if (!targetUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    // Prevent deleting other admin accounts
+    if (targetUser.email === "admin@admin.pl") {
+      return res.status(403).json({ message: "Cannot delete admin accounts" });
+    }
+    
+    // Check for active borrows
+    const activeBorrows = await Borrow.count({
+      where: { 
+        userId: targetUserId, 
+        returnedAt: null 
+      }
+    });
+
+    if (activeBorrows > 0) {
+      return res.status(400).json({ 
+        message: "Cannot delete user with active book borrows. Ask them to return all borrowed books first." 
+      });
+    }
+
+    // Delete the user account (CASCADE will handle reviews, borrows, and favorites)
+    await targetUser.destroy();
+
+    res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 export const updateUser = async (req, res) => {
   try {
     const { name, currentPassword, newPassword } = req.body;

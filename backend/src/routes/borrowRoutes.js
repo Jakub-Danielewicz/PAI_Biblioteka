@@ -4,9 +4,9 @@ import { authenticate } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/borrow', authenticate, borrowCopy);
-router.post('/return', authenticate, returnCopy);
+router.post('/borrows', authenticate, borrowCopy);
 router.get('/borrows', authenticate, getBorrows);
 router.patch('/borrows/:id', authenticate, updateBorrow);
+router.patch('/borrows/:id/return', authenticate, returnCopy);
 
 export default router;

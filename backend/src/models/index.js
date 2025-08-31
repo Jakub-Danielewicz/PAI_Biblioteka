@@ -31,18 +31,18 @@ Copy.belongsTo(User, {
   as: 'borrower',
 });
 Copy.hasMany(Borrow, { foreignKey: 'copyId', as: 'borrows' });
-User.hasMany(Borrow, { foreignKey: 'userId', as: 'borrows' });
+User.hasMany(Borrow, { foreignKey: 'userId', as: 'borrows', onDelete: 'CASCADE' });
 Borrow.belongsTo(Copy, { foreignKey: 'copyId', as: 'copy' });
 Borrow.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
-User.hasMany(Review, { foreignKey: 'userId', as: 'reviews' });
+User.hasMany(Review, { foreignKey: 'userId', as: 'reviews', onDelete: 'CASCADE' });
 Review.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-Book.hasMany(Review, { foreignKey: 'bookId', as: 'reviews', sourceKey: 'ISBN_13' });
+Book.hasMany(Review, { foreignKey: 'bookId', as: 'reviews', sourceKey: 'ISBN_13', onDelete: 'CASCADE' });
 Review.belongsTo(Book, { foreignKey: 'bookId', as: 'book', targetKey: 'ISBN_13' });
 
-User.hasMany(Favorite, { foreignKey: 'userId', as: 'favorites' });
+User.hasMany(Favorite, { foreignKey: 'userId', as: 'favorites', onDelete: 'CASCADE' });
 Favorite.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-Book.hasMany(Favorite, { foreignKey: 'bookId', as: 'favorites', sourceKey: 'ISBN_13' });
+Book.hasMany(Favorite, { foreignKey: 'bookId', as: 'favorites', sourceKey: 'ISBN_13', onDelete: 'CASCADE' });
 Favorite.belongsTo(Book, { foreignKey: 'bookId', as: 'book', targetKey: 'ISBN_13' });
 
 export { sequelize, Book, Copy, User, Borrow, Review, Favorite };

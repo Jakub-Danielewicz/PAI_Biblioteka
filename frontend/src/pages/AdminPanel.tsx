@@ -3,10 +3,11 @@ import { useState } from "react";
 import BooksManager from "../components/BooksManager";
 import CopiesManager from "../components/CopiesManager";
 import BorrowsManager from "../components/BorrowsManager";
+import UsersManager from "../components/UsersManager";
 import { useAuth } from '../context/AuthContext'
 
 export default function AdminPanel() {
-  const [activeTab, setActiveTab] = useState<"books" | "copies" | "borrows">("books");
+  const [activeTab, setActiveTab] = useState<"books" | "copies" | "borrows" | "users">("books");
   const [selectedISBN, setSelectedISBN] = useState<string | null>(null);
   const { logout } = useAuth()
 
@@ -46,6 +47,13 @@ export default function AdminPanel() {
     >
       Rezerwacje
     </button>
+
+    <button
+      onClick={() => setActiveTab("users")}
+      className={`px-4 py-2 rounded-lg ${activeTab === "users" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+    >
+      Użytkownicy
+    </button>
   </div>
 
   {/* Zawartość */}
@@ -61,6 +69,9 @@ export default function AdminPanel() {
     )}
     {activeTab === "borrows" && (
       <BorrowsManager />
+    )}
+    {activeTab === "users" && (
+      <UsersManager />
     )}
   </div>
 </div>
