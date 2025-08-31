@@ -9,7 +9,7 @@ export const authenticate = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    
+
     // Verify user still exists in database
     const user = await User.findByPk(decoded.id);
     if (!user) {
@@ -22,7 +22,7 @@ export const authenticate = async (req, res, next) => {
       name: user.name,
       email: user.email
     };
-    
+
     next();
   } catch (err) {
     res.status(401).json({ message: "Invalid token" });

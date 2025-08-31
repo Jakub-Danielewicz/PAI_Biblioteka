@@ -194,8 +194,9 @@ export async function getBorrows(req, res) {
   const { userId, bookId } = req.query;
   let where;
 
-  // Jeśli użytkownik ma ID 1, zwracamy wszystko
-  if (req.user.id === 1) {
+  // Check if user is admin
+  const isAdmin = req.user.email === 'admin@admin.pl';
+  if (isAdmin) {
     where = {};
   } else {
     where = { userId: req.user.id };
