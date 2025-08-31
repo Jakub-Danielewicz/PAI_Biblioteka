@@ -24,7 +24,10 @@ export default function(sequelize) {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    // Dodaj inne pola według potrzeb
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   }, {
     tableName: 'books',
     timestamps: false,
