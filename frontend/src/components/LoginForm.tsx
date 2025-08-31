@@ -23,12 +23,12 @@ export default function LoginForm() {
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError("Please enter a valid email address");
+      setError("Proszę podać prawidłowy adres email");
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setError("Hasło musi mieć co najmniej 6 znaków");
       return;
     }
 
@@ -41,7 +41,7 @@ export default function LoginForm() {
           email,
           password,
         });
-        alert(`Registration successful: ${res.data.user.name}`);
+        alert(`Rejestracja pomyślna: ${res.data.user.name}`);
       } else {
         const res = await axios.post('http://localhost:3001/api/auth/login', {
           email,
@@ -52,7 +52,7 @@ export default function LoginForm() {
         // alert(`Welcome back, ${res.data.user.name}`);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Server error');
+      setError(err.response?.data?.message || 'Błąd serwera');
     } finally {
       setLoading(false);
     }
@@ -62,10 +62,10 @@ export default function LoginForm() {
     <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto space-y-6">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-white mb-2">
-          {isSignUp ? 'Create Account' : 'Welcome Back'}
+          {isSignUp ? 'Utwórz konto' : 'Witamy ponownie'}
         </h2>
         <p className="text-white/80">
-          {isSignUp ? 'Join our library community today' : 'Sign in to access your library'}
+          {isSignUp ? 'Dołącz dziś do naszej społeczności bibliotecznej' : 'Zaloguj się, aby uzyskać dostęp do swojej biblioteki'}
         </p>
       </div>
 
@@ -74,14 +74,14 @@ export default function LoginForm() {
       {isSignUp && (
         <Field>
           <Label className="block text-sm font-medium text-white mb-2">
-            First Name
+            Imię
           </Label>
           <Input
             type="text"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             className="w-full px-4 py-3 bg-white/50 border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition placeholder-gray-500 backdrop-blur-sm"
-            placeholder="John"
+            placeholder="Jan"
             required
           />
         </Field>
@@ -89,28 +89,28 @@ export default function LoginForm() {
 
       <Field>
         <Label className="block text-sm font-medium text-white mb-2">
-          Email Address
+          Adres email
         </Label>
         <Input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full px-4 py-3 bg-white/50 border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition placeholder-gray-500 backdrop-blur-sm"
-          placeholder={isSignUp ? "john.doe@example.com" : "Enter your email"}
+          placeholder={isSignUp ? "jan.kowalski@example.com" : "Wprowadź swój email"}
           required
         />
       </Field>
 
       <Field>
         <Label className="block text-sm font-medium text-white mb-2">
-          Password
+          Hasło
         </Label>
         <Input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full px-4 py-3 bg-white/50 border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition placeholder-gray-500 backdrop-blur-sm"
-          placeholder={isSignUp ? "Create a secure password" : "Enter your password"}
+          placeholder={isSignUp ? "Utwórz bezpieczne hasło" : "Wprowadź swoje hasło"}
           required
         />
       </Field>
@@ -120,23 +120,23 @@ export default function LoginForm() {
         disabled={loading}
         className="w-full bg-purple-600/90 backdrop-blur-sm text-white py-3 rounded-lg font-semibold hover:bg-purple-700/90 transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50"
       >
-        {loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
+        {loading ? 'Proszę czekać...' : isSignUp ? 'Utwórz konto' : 'Zaloguj się'}
       </button>
 
       <div className="text-center space-y-2">
         <div className="text-sm text-white/80">
-          {isSignUp ? 'Already have an account?' : "Don't have an account yet?"}{' '}
+          {isSignUp ? 'Masz już konto?' : 'Nie masz jeszcze konta?'}{' '}
           <span
             onClick={() => setIsSignUp(!isSignUp)}
             className="text-white underline hover:text-white/80 transition-colors cursor-pointer"
           >
-            {isSignUp ? 'Sign in here' : 'Create one here'}
+            {isSignUp ? 'Zaloguj się tutaj' : 'Utwórz je tutaj'}
           </span>
         </div>
         <div className="text-xs text-white/60">
           {isSignUp
-            ? 'Join thousands of book lovers in our digital library.'
-            : 'Access your personal collection and discover new books.'}
+            ? 'Dołącz do tysięcy miłośników książek w naszej cyfrowej bibliotece.'
+            : 'Uzyskaj dostęp do swojej osobistej kolekcji i odkrywaj nowe książki.'}
         </div>
       </div>
     </form>
