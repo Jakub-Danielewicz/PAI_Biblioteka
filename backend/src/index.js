@@ -2,13 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { sequelize } from './models/index.js';
-import { authenticate } from "./middleware/authMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import bookRoutes from './routes/bookRoutes.js';
 import borrowRoutes from './routes/borrowRoutes.js';
 import reviewRoutes from "./routes/reviewRoutes.js";
 import favoriteRoutes from "./routes/favoriteRoutes.js";
+import { createAdminIfNotExists } from './createAdmin.js';
 
 dotenv.config();
 
@@ -29,8 +29,10 @@ app.get('/', (req, res) => {
   res.send('Backend Express działa!');
 });
 
-sequelize.sync().then(() => {
+sequelize.sync().then(async () => {
+  await createAdminIfNotExists(); 
   app.listen(PORT, () => {
     console.log(`Serwer działa na porcie ${PORT}`);
   });
 });
+

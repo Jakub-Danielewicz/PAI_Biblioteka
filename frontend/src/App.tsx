@@ -5,13 +5,13 @@ import BookPage from './pages/BookPage'
 import BookRentalsPage from './pages/BookRentalsPage'
 import FavoritesPage from './pages/FavoritesPage'
 import { Routes, Route } from 'react-router'
-import { useAuth } from "./context/AuthContext";
 import Layout from './components/Layout'
 import UserProfilePage from './pages/UserProfilePage'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminPanel from './pages/AdminPanel'
+import AdminRoute from './components/AdminRoute'
 
 function App() {
-  const { isLoggedIn } = useAuth();
 
   return (
     <Layout>
@@ -59,6 +59,13 @@ function App() {
               <UserProfilePage />
             </ProtectedRoute>
           }
+        />
+         <Route
+          path='/adminPanel'
+          element={
+          <AdminRoute>
+            <AdminPanel />
+          </AdminRoute>}
         />
       </Routes>
     </Layout>

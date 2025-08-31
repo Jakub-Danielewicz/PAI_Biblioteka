@@ -192,9 +192,18 @@ export async function returnCopy(req, res) {
 // GET /borrows?userId=...&bookId=...
 export async function getBorrows(req, res) {
   const { userId, bookId } = req.query;
-  const where = { userId: req.user.id };
+  let where;
+
+  // Jeśli użytkownik ma ID 1, zwracamy wszystko
+  if (req.user.id === 1) {
+    where = {};
+  } else {
+    where = { userId: req.user.id };
+  }
+
   if (userId) where.userId = userId;
   if (bookId) where['$copy.ISBN_13$'] = bookId;
+
   try {
     const borrows = await Borrow.findAll({
       where,
@@ -214,7 +223,7 @@ export async function getBorrows(req, res) {
       ],
     });
 
-    // If the nested include doesn't work, let's fetch book data manually
+    // Fetch book data manually jeśli nested include nie działa
     const borrowsWithBooks = await Promise.all(
       borrows.map(async (borrow) => {
         const book = await Book.findOne({ where: { ISBN_13: borrow.copy.ISBN_13 } });
@@ -232,4 +241,5 @@ export async function getBorrows(req, res) {
   } catch (err) {
     return res.status(500).json({ error: 'Internal server error', details: err.message });
   }
+
 }

@@ -7,9 +7,9 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isLoggedIn } = useAuth();
+  const { user, isLoggedIn } = useAuth()
 
-  if (!isLoggedIn) {
+  if (!isLoggedIn || user?.email == "admin@admin.pl") {
     return <LoginPage />;
   }
 
