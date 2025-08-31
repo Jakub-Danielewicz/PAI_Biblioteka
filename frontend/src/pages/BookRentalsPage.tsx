@@ -19,6 +19,8 @@ export default function BookRentalsPage() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "ongoing" | "overdue" | "returned">("all");
   const [returning, setReturning] = useState<number | null>(null);
+  const [extending, setExtending] = useState<number | null>(null);
+  const [showExtendModal, setShowExtendModal] = useState<number | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,6 +60,22 @@ export default function BookRentalsPage() {
       return;
     }
     navigate(`/book/${rental.copy.book.ISBN_13}`);
+  };
+
+  const handleExtend = async (rentalId: number, newDueDate: string) => {
+    setExtending(rentalId);
+    try {
+      await api.patch(`/borrows/${rentalId}`, { dueDate: newDueDate });
+      // Refresh the rentals list
+      const response = await api.get("/borrows");
+      setRentals(response.data || []);
+      setShowExtendModal(null);
+    } catch (error: any) {
+      console.error('Failed to extend rental:', error);
+      alert(error.response?.data?.error || 'Failed to extend rental');
+    } finally {
+      setExtending(null);
+    }
   };
 
   const filteredRentals = rentals
@@ -204,13 +222,22 @@ export default function BookRentalsPage() {
                           </div>
                           
                           {!isReturned && (
-                            <button
-                              onClick={() => handleReturn(rental.id)}
-                              disabled={returning === rental.id}
-                              className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium text-sm transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {returning === rental.id ? 'Zwracanie...' : 'Zwróć książkę'}
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setShowExtendModal(rental.id)}
+                                disabled={extending === rental.id}
+                                className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium text-sm transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {extending === rental.id ? 'Przedłużanie...' : 'Przedłuż'}
+                              </button>
+                              <button
+                                onClick={() => handleReturn(rental.id)}
+                                disabled={returning === rental.id}
+                                className="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium text-sm transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {returning === rental.id ? 'Zwracanie...' : 'Zwróć'}
+                              </button>
+                            </div>
                           )}
                         </div>
 
@@ -224,6 +251,75 @@ export default function BookRentalsPage() {
           })}
         </section>
       </main>
+
+      {/* Extend Modal */}
+      {showExtendModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
+            {(() => {
+              const rental = rentals.find(r => r.id === showExtendModal);
+              if (!rental) return null;
+              
+              const currentDueDate = new Date(rental.dueDate);
+              const tomorrow = new Date(currentDueDate);
+              tomorrow.setDate(currentDueDate.getDate() + 1);
+              
+              const maxDate = new Date(rental.borrowedAt);
+              maxDate.setDate(maxDate.getDate() + 60);
+              
+              return (
+                <>
+                  <h2 className="text-lg font-bold mb-4">Przedłuż wypożyczenie</h2>
+                  
+                  <p className="text-sm text-gray-600 mb-4">
+                    <strong>{rental.copy.book.title}</strong>
+                  </p>
+                  
+                  <p className="text-sm text-gray-600 mb-4">
+                    Obecny termin zwrotu: {currentDueDate.toLocaleDateString()}
+                  </p>
+
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const newDueDate = formData.get('newDueDate') as string;
+                    if (newDueDate) {
+                      handleExtend(showExtendModal, newDueDate);
+                    }
+                  }}>
+                    <label className="block text-sm font-medium mb-2">Nowy termin zwrotu:</label>
+                    <input
+                      type="date"
+                      name="newDueDate"
+                      min={tomorrow.toISOString().split('T')[0]}
+                      max={maxDate.toISOString().split('T')[0]}
+                      className="w-full p-2 border border-gray-300 rounded mb-4"
+                      required
+                    />
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowExtendModal(null)}
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                      >
+                        Anuluj
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={extending === showExtendModal}
+                        className="flex-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+                      >
+                        {extending === showExtendModal ? 'Przedłużanie...' : 'Przedłuż'}
+                      </button>
+                    </div>
+                  </form>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
