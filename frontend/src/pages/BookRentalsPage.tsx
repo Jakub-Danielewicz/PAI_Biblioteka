@@ -42,7 +42,7 @@ export default function BookRentalsPage() {
   const handleReturn = async (borrowId: number) => {
     setReturning(borrowId);
     try {
-      await api.post('/return', { borrowId });
+      await api.patch(`/borrows/${borrowId}/return`);
       // Refresh the rentals list
       const response = await api.get("/borrows");
       setRentals(response.data || []);

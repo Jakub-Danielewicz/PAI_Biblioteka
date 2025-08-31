@@ -27,7 +27,7 @@ export default function ReviewForm({ bookId, onReviewAdded, onCancel }: ReviewFo
     setError(null);
 
     try {
-      const response = await api.post(`/api/reviews/${bookId}`, {
+      const response = await api.post(`/reviews/${bookId}`, {
         rating,
         comment: comment.trim()
       });

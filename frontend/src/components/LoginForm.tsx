@@ -1,8 +1,8 @@
 import { Field, Input, Label } from '@headlessui/react';
 import { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router';
 import { useAuth } from "../context/AuthContext";
+import api from "../utils/api";
 
 export default function LoginForm() {
   const [isSignUp, setIsSignUp] = useState(true);
@@ -36,14 +36,14 @@ export default function LoginForm() {
 
     try {
       if (isSignUp) {
-        const res = await axios.post('http://localhost:3001/api/auth/register', {
+        const res = await api.post('/auth/register', {
           name: firstName,
           email,
           password,
         });
         alert(`Rejestracja pomyślna: ${res.data.user.name}`);
       } else {
-        const res = await axios.post('http://localhost:3001/api/auth/login', {
+        const res = await api.post('/auth/login', {
           email,
           password,
         });

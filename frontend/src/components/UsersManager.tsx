@@ -25,7 +25,7 @@ export default function UsersManager() {
 
   const fetchUsers = async () => {
     try {
-      const response = await api.get("/api/user");
+      const response = await api.get("/user");
       setUsers(response.data || []);
       setLoading(false);
     } catch (err: any) {
@@ -49,7 +49,7 @@ export default function UsersManager() {
     }
 
     try {
-      const response = await api.post("/api/auth/register", newUser);
+      const response = await api.post("/auth/register", newUser);
       setUsers([...users, response.data.user]);
       setNewUser({ name: "", email: "", password: "" });
       setShowAddForm(false);
@@ -65,7 +65,7 @@ export default function UsersManager() {
     }
 
     try {
-      await api.delete(`/api/user/${userId}`);
+      await api.delete(`/user/${userId}`);
       setUsers(users.filter(user => user.id !== userId));
       setError("");
     } catch (err: any) {

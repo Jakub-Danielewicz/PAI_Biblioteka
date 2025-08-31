@@ -10,7 +10,7 @@ export default function FavoritesPage() {
 
   const fetchFavorites = async () => {
     try {
-      const response = await api.get("/api/favorites");
+      const response = await api.get("/favorites");
       setFavorites(response.data || []);
       setLoading(false);
     } catch (e: any) {

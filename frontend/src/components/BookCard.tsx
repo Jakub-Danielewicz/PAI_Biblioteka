@@ -40,7 +40,7 @@ export default function BookCard({ book, index = 0, onBookBorrowed }: BookCardPr
   useEffect(() => {
     const checkIfFavorite = async () => {
       try {
-        const response = await api.get(`/api/favorites/check/${book.ISBN_13}`);
+        const response = await api.get(`/favorites/${book.ISBN_13}`);
         setIsFavorite(response.data.isFavorite);
       } catch (error) {
         console.error('Failed to check favorite status:', error);
@@ -58,7 +58,7 @@ export default function BookCard({ book, index = 0, onBookBorrowed }: BookCardPr
   const handleBorrowConfirm = async (returnDate: string) => {
     setBorrowing(true);
     try {
-      await api.post('/borrow', {
+      await api.post('/borrows', {
         ISBN_13: book.ISBN_13,
         returnDate: returnDate
       });
@@ -83,10 +83,10 @@ export default function BookCard({ book, index = 0, onBookBorrowed }: BookCardPr
     setFavoriteLoading(true);
     try {
       if (isFavorite) {
-        await api.delete(`/api/favorites/${book.ISBN_13}`);
+        await api.delete(`/favorites/${book.ISBN_13}`);
         setIsFavorite(false);
       } else {
-        await api.post('/api/favorites', { bookId: book.ISBN_13 });
+        await api.post('/favorites', { bookId: book.ISBN_13 });
         setIsFavorite(true);
       }
     } catch (error: any) {

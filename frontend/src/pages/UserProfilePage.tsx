@@ -23,7 +23,7 @@ export default function UserProfile() {
   const handleSaveName = async () => {
     setLoading(true);
     try {
-      const response = await api.put("/api/user", { name: tempName });
+      const response = await api.put("/user", { name: tempName });
 
       login(localStorage.getItem("token")!, response.data.user);
       setEditingName(false);
@@ -44,7 +44,7 @@ export default function UserProfile() {
 
     setLoading(true);
     try {
-      await api.put("/api/user", {
+      await api.put("/user", {
         currentPassword: oldPassword,
         newPassword: newPassword
       });
@@ -69,7 +69,7 @@ export default function UserProfile() {
 
     setDeleting(true);
     try {
-      await api.delete("/api/user", {
+      await api.delete("/user", {
         data: { password: deletePassword }
       });
 
