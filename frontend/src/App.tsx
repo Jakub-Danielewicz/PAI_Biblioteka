@@ -9,6 +9,7 @@ import Layout from './components/Layout'
 import UserProfilePage from './pages/UserProfilePage'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminPanel from './pages/AdminPanel'
+import AdminRoute from './components/AdminRoute'
 
 function App() {
 
@@ -61,7 +62,10 @@ function App() {
         />
          <Route
           path='/adminPanel'
-          element={<AdminPanel />}
+          element={
+          <AdminRoute>
+            <AdminPanel />
+          </AdminRoute>}
         />
       </Routes>
     </Layout>

@@ -48,8 +48,11 @@ export default function LoginForm() {
           password,
         });
         login(res.data.token, res.data.user);
-        navigate("/")
-        // alert(`Welcome back, ${res.data.user.name}`);
+       if (res.data.user.email === "admin@admin.pl") {
+        navigate("/adminPanel");
+      } else {
+        navigate("/");
+      }
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Server error');

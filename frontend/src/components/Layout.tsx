@@ -7,11 +7,11 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { isLoggedIn } = useAuth()
+  const { user, isLoggedIn } = useAuth()
 
   return (
     <div className='w-full h-screen'>
-      {isLoggedIn && <Navbar />}
+      {isLoggedIn && user?.email !== "admin@admin.pl" && <Navbar />}
       {children}
     </div>
   )
