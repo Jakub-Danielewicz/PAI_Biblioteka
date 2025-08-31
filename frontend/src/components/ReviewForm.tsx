@@ -17,7 +17,7 @@ export default function ReviewForm({ bookId, onReviewAdded, onCancel }: ReviewFo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (rating === 0) {
       setError('Please select a rating');
       return;
@@ -44,13 +44,13 @@ export default function ReviewForm({ bookId, onReviewAdded, onCancel }: ReviewFo
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-blue-200">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">✍️ Write a Review</h3>
-      
+      <h3 className="text-xl font-bold text-gray-800 mb-4">✍️ Napisz recenzję</h3>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Rating */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Rating *
+            Ocena
           </label>
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -76,18 +76,18 @@ export default function ReviewForm({ bookId, onReviewAdded, onCancel }: ReviewFo
         {/* Comment */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Your Review (Optional)
+            Twoja opinia
           </label>
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none"
-            placeholder="Share your thoughts about this book..."
+            placeholder="Napisz co myślisz o tej książce..."
             maxLength={500}
           />
           <div className="text-right text-xs text-gray-500 mt-1">
-            {comment.length}/500 characters
+            {comment.length}/500 znaków
           </div>
         </div>
 
@@ -105,14 +105,15 @@ export default function ReviewForm({ bookId, onReviewAdded, onCancel }: ReviewFo
             disabled={loading || rating === 0}
             className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Submitting...' : 'Submit Review'}
+            {loading ? 'Wysyłanie...' : 'Wyślij opinię'}
           </button>
           <button
             type="button"
             onClick={onCancel}
             className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            Anuluj
+
           </button>
         </div>
       </form>
