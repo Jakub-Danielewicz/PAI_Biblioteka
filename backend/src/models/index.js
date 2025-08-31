@@ -4,6 +4,7 @@ import copyModel from './copy.js';
 import userModel from './user.js';
 import borrowModel from './borrow.js';
 import reviewModel from './review.js';
+import favoriteModel from './favorite.js';
 
 const sequelize = new Sequelize(process.env.DB_CONNECTION_STRING || 'sqlite:./database.sqlite');
 
@@ -12,6 +13,7 @@ const Copy = copyModel(sequelize);
 const User = userModel(sequelize);
 const Borrow = borrowModel(sequelize);
 const Review = reviewModel(sequelize);
+const Favorite = favoriteModel(sequelize);
 
 Book.hasMany(Copy, {
   foreignKey: 'ISBN_13',
@@ -38,4 +40,9 @@ Review.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Book.hasMany(Review, { foreignKey: 'bookId', as: 'reviews', sourceKey: 'ISBN_13' });
 Review.belongsTo(Book, { foreignKey: 'bookId', as: 'book', targetKey: 'ISBN_13' });
 
-export { sequelize, Book, Copy, User, Borrow, Review };
+User.hasMany(Favorite, { foreignKey: 'userId', as: 'favorites' });
+Favorite.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+Book.hasMany(Favorite, { foreignKey: 'bookId', as: 'favorites', sourceKey: 'ISBN_13' });
+Favorite.belongsTo(Book, { foreignKey: 'bookId', as: 'book', targetKey: 'ISBN_13' });
+
+export { sequelize, Book, Copy, User, Borrow, Review, Favorite };
