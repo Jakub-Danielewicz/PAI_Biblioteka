@@ -7,9 +7,9 @@ import CalendarWidget from "../components/CalendarWidget";
 const today = new Date();
 
 const sectionIcons = {
-  Ongoing: ClockIcon,
-  Overdue: ExclamationCircleIcon,
-  Returned: CheckCircleIcon,
+  Trwające: ClockIcon,
+  Przeterminowane: ExclamationCircleIcon,
+  Zwrócone: CheckCircleIcon,
 };
 
 export default function BookRentalsPage() {
@@ -68,26 +68,26 @@ export default function BookRentalsPage() {
     });
 
   const sections = {
-    Ongoing: filteredRentals.filter(b => {
+    Trwające: filteredRentals.filter(b => {
       const isReturned = b.returnedAt !== null;
       const dueDate = new Date(new Date(b.borrowedAt).getTime() + 30 * 24 * 60 * 60 * 1000);
       return !isReturned && dueDate >= today;
     }),
-    Returned: filteredRentals.filter(b => b.returnedAt !== null),
-    Overdue: filteredRentals.filter(b => {
+    Zwrócone: filteredRentals.filter(b => b.returnedAt !== null),
+    Przeterminowane: filteredRentals.filter(b => {
       const isReturned = b.returnedAt !== null;
       const dueDate = new Date(new Date(b.borrowedAt).getTime() + 30 * 24 * 60 * 60 * 1000);
       return !isReturned && dueDate < today;
     }),
   };
 
-  const sectionOrder: (keyof typeof sections)[] = ["Ongoing", "Returned", "Overdue"];
+  const sectionOrder: (keyof typeof sections)[] = ["Trwające", "Zwrócone", "Przeterminowane"];
 
   if (loading) {
     return (
       <div className="w-full min-h-screen bg-gray-50 flex flex-col">
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-gray-800 text-lg">Loading rentals...</p>
+          <p className="text-gray-800 text-lg">Ładowanie wypożyczeń...</p>
         </div>
       </div>
     );
@@ -98,7 +98,7 @@ export default function BookRentalsPage() {
       <div className="w-full min-h-screen bg-gray-50 flex flex-col">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-semibold text-gray-800 mb-2">📚 My Rentals</h1>
+            <h1 className="text-2xl font-semibold text-gray-800 mb-2">📚 Moje Wypożyczenia</h1>
             <p className="text-red-600">{error}</p>
           </div>
         </div>
@@ -110,23 +110,23 @@ export default function BookRentalsPage() {
     <div className="w-full min-h-screen bg-gray-50 flex flex-col">
       <main className="flex-1 p-6 flex flex-col lg:flex-row gap-6">
         <aside className="w-full lg:w-1/4 bg-white rounded-2xl shadow-md p-4">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">📅 Calendar</h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">📅 Kalendarz</h2>
           <CalendarWidget />
         </aside>
 
         <section className="flex-1 flex flex-col gap-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">📚 My Rentals</h1>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">📚 Moje Wypożyczenia</h1>
 
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as any)}
               className="px-4 py-2 sm:py-3 rounded-xl border border-gray-300 bg-gradient-to-r from-blue-50 to-white shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg font-medium transition-all hover:scale-105"
             >
-              <option value="all">All</option>
-              <option value="ongoing">Ongoing</option>
-              <option value="overdue">Overdue</option>
-              <option value="returned">Returned</option>
+              <option value="all">Wszystkie</option>
+              <option value="ongoing">Trwające</option>
+              <option value="overdue">Przeterminowane</option>
+              <option value="returned">Zwrócone</option>
             </select>
           </div>
 
@@ -140,9 +140,9 @@ export default function BookRentalsPage() {
                 <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-teal-400 border-b border-gray-300 pb-2 flex items-center gap-2">
                   <SectionIcon
                     className={`w-6 h-6 ${
-                      sectionName === "Overdue"
+                      sectionName === "Przeterminowane"
                         ? "text-red-500"
-                        : sectionName === "Ongoing"
+                        : sectionName === "Trwające"
                         ? "text-green-500"
                         : "text-gray-500"
                     }`}
@@ -161,15 +161,15 @@ export default function BookRentalsPage() {
                     let statusText = "";
 
                     if (isReturned) {
-                      statusText = "Returned";
+                      statusText = "Zwrócona";
                       statusColor = "border-gray-400";
                       textColor = "text-gray-500";
                     } else if (dueDate < today) {
-                      statusText = "Overdue!";
+                      statusText = "Przeterminowana!";
                       statusColor = "border-red-500";
                       textColor = "text-red-600";
                     } else {
-                      statusText = "Ongoing";
+                      statusText = "Trwająca";
                       statusColor = "border-green-500";
                       textColor = "text-green-600";
                     }
@@ -187,9 +187,9 @@ export default function BookRentalsPage() {
                             <BookOpenIcon className="w-10 h-10 text-blue-500 flex-shrink-0" />
                             <div className="flex-1">
                               <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{rental.copy.book.title}</h3>
-                              <p className="text-gray-500 text-sm">Author: {rental.copy.book.author}</p>
-                              <p className="text-gray-500 text-sm">Borrowed: {borrowDate.toDateString()}</p>
-                              <p className="text-gray-500 text-sm">Due: {dueDate.toDateString()}</p>
+                              <p className="text-gray-500 text-sm">Autor: {rental.copy.book.author}</p>
+                              <p className="text-gray-500 text-sm">Wypożyczona: {borrowDate.toDateString()}</p>
+                              <p className="text-gray-500 text-sm">Termin zwrotu: {dueDate.toDateString()}</p>
                             </div>
                           </div>
                           
@@ -199,7 +199,7 @@ export default function BookRentalsPage() {
                               disabled={returning === rental.id}
                               className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium text-sm transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {returning === rental.id ? 'Returning...' : 'Return Book'}
+                              {returning === rental.id ? 'Zwracanie...' : 'Zwróć książkę'}
                             </button>
                           )}
                         </div>

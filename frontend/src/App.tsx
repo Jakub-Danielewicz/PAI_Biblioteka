@@ -3,6 +3,7 @@ import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 import BookPage from './pages/BookPage'
 import BookRentalsPage from './pages/BookRentalsPage'
+import FavoritesPage from './pages/FavoritesPage'
 import { Routes, Route } from 'react-router'
 import { useAuth } from "./context/AuthContext";
 import Layout from './components/Layout'
@@ -40,6 +41,14 @@ function App() {
           element={
             <ProtectedRoute>
               <BookRentalsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/favorites'
+          element={
+            <ProtectedRoute>
+              <FavoritesPage />
             </ProtectedRoute>
           }
         />

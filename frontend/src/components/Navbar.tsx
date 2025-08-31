@@ -11,8 +11,7 @@ export default function Navbar() {
 
   const navItems = [
     { path: '/', label: 'Książki' },
-    { path: '/authors', label: 'Autorzy' },
-    { path: '/categories', label: 'Kategorie' },
+    { path: '/favorites', label: 'Ulubione' },
     { path: '/rentals', label: 'Wypożyczenia' }
   ]
 
