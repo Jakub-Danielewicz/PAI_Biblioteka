@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { BookOpenIcon, ClockIcon, CheckCircleIcon, ExclamationCircleIcon, StarIcon } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router";
 import api from "../utils/api";
 import CalendarWidget from "../components/CalendarWidget";
 
@@ -18,6 +19,7 @@ export default function BookRentalsPage() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "ongoing" | "overdue" | "returned">("all");
   const [returning, setReturning] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRentals = async () => {
@@ -50,10 +52,17 @@ export default function BookRentalsPage() {
     }
   };
 
+  const handleRentalClick = (rental: any, e: React.MouseEvent) => {
+    // Don't navigate if clicking on the return button
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
+    }
+    navigate(`/book/${rental.copy.book.ISBN_13}`);
+  };
+
   const filteredRentals = rentals
     .filter((rental) => {
-      const borrowDate = new Date(rental.borrowedAt);
-      const dueDate = new Date(borrowDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from borrow date
+      const dueDate = new Date(rental.dueDate);
       const isReturned = rental.returnedAt !== null;
       
       if (filter === "ongoing") return !isReturned && dueDate >= today;
@@ -62,21 +71,21 @@ export default function BookRentalsPage() {
       return true;
     })
     .sort((a, b) => {
-      const dueDateA = new Date(new Date(a.borrowedAt).getTime() + 30 * 24 * 60 * 60 * 1000);
-      const dueDateB = new Date(new Date(b.borrowedAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      const dueDateA = new Date(a.dueDate);
+      const dueDateB = new Date(b.dueDate);
       return dueDateA.getTime() - dueDateB.getTime();
     });
 
   const sections = {
     Trwające: filteredRentals.filter(b => {
       const isReturned = b.returnedAt !== null;
-      const dueDate = new Date(new Date(b.borrowedAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      const dueDate = new Date(b.dueDate);
       return !isReturned && dueDate >= today;
     }),
     Zwrócone: filteredRentals.filter(b => b.returnedAt !== null),
     Przeterminowane: filteredRentals.filter(b => {
       const isReturned = b.returnedAt !== null;
-      const dueDate = new Date(new Date(b.borrowedAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      const dueDate = new Date(b.dueDate);
       return !isReturned && dueDate < today;
     }),
   };
@@ -153,7 +162,7 @@ export default function BookRentalsPage() {
                 <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
                   {books.map((rental) => {
                     const borrowDate = new Date(rental.borrowedAt);
-                    const dueDate = new Date(borrowDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+                    const dueDate = new Date(rental.dueDate);
                     const isReturned = rental.returnedAt !== null;
 
                     let statusColor = "border-gray-400";
@@ -180,7 +189,8 @@ export default function BookRentalsPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: 0.1 }}
-                        className={`bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg p-5 border-l-8 ${statusColor} transition transform hover:scale-105 hover:shadow-2xl flex flex-col gap-3`}
+                        onClick={(e) => handleRentalClick(rental, e)}
+                        className={`bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg p-5 border-l-8 ${statusColor} transition transform hover:scale-105 hover:shadow-2xl flex flex-col gap-3 cursor-pointer`}
                       >
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <div className="flex items-center gap-4">

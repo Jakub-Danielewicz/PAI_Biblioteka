@@ -64,6 +64,7 @@ export async function borrowCopy(req, res) {
       copyId: availableCopy.id,
       borrowedAt: new Date(),
       returnedAt: null,
+      dueDate: selectedReturnDate,
     });
 
     // Update copy status and set borrowedBy

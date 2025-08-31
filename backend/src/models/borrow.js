@@ -32,6 +32,10 @@ export default (sequelize) => {
       type: DataTypes.DATE,
       allowNull: true,
     },
+    dueDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
   }, {
     tableName: 'borrows',
     timestamps: false,
